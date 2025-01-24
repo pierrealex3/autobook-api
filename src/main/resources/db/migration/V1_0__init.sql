@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS vehicle (
 CREATE TABLE IF NOT EXISTS user_vehicle_asso (
   user_id VARCHAR(64),
   vehicle_id INTEGER,
-  possession_date TIMESTAMP,
+  possession_date TIMESTAMP DEFAULT NOW(),
   PRIMARY KEY (user_id, vehicle_id, possession_date),
   CONSTRAINT fk_user
     FOREIGN KEY (user_id)

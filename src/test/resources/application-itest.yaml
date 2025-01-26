@@ -1,0 +1,6 @@
+spring:
+  test:
+    database:
+      replace: none  # turn-off the autoconfiguration of DataSource bean using in-memory database
+  datasource:
+    url: jdbc:tc:postgresql:latest:///autobook

@@ -1,0 +1,4 @@
+BEGIN;
+DELETE FROM api_user;
+DELETE FROM vehicle;
+COMMIT;

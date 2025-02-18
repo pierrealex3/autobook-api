@@ -35,5 +35,5 @@ public class UserEntity {
             inverseJoinColumns = @JoinColumn(name = "vehicle_id")
     )
     @Setter(AccessLevel.NONE)
-    private Set<VehicleEntity> vehicleSet = new HashSet<>();;
+    private Set<VehicleEntity> vehicleSet = new HashSet<>();
 }

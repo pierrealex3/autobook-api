@@ -36,7 +36,11 @@ create table if not exists appointment (
   title VARCHAR(100) not null,
   note VARCHAR(200),
   date DATE,
-  time TIME
+  time TIME,
+  vehicle_id INTEGER,
+  constraint fk_vehicle_3
+    foreign key (vehicle_id)
+      references vehicle(id)
 );
 
 create table if not exists appointment_note (

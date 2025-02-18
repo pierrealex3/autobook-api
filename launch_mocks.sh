@@ -13,6 +13,7 @@ export WIREMOCK_TARGET_DIR=/mnt/c/users/plemire/code/autobook-backend/wiremock/m
 # make the substitutions in the templates
 ## TODO a foreach !
 envsubst < ./wiremock_templates/vehiclesGetStubProxy.json > "$CUR_WORKDIR/wiremock_vehiclesGetStubProxy.json"
+envsubst < ./wiremock_templates/appointmentSaveStubProxy.json > "$CUR_WORKDIR/wiremock_appointmentSaveStubProxy.json"
 
 
 # delete the old template targets at the template terget root dir
@@ -21,6 +22,7 @@ rm -rf "$WIREMOCK_TARGET_DIR"/subs_.*;
 # move in the substituted active targets
 ## TODO a foreach !
 mv "$CUR_WORKDIR/wiremock_vehiclesGetStubProxy.json" "$WIREMOCK_TARGET_DIR/subs_vehiclesGetStubProxy.json"
+mv "$CUR_WORKDIR/wiremock_appointmentSaveStubProxy.json" "$WIREMOCK_TARGET_DIR/subs_appointmentSaveStubProxy.json"
 
 
 # delete this task work dir

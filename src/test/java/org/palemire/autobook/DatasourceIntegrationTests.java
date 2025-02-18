@@ -78,8 +78,8 @@ public class DatasourceIntegrationTests {
         );
     }
 
-    @Sql(value = "/sql/insertUserAndVehicle.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-    @Sql(value = "/sql/deleteUserAndVehicle.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    @Sql(scripts = "/sql/insertUserAndVehicle.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    @Sql(scripts = "/sql/deleteUserAndVehicle.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     @Test
     void existingUserAndVehicle_associationIsCreated_vehicleAppearsInUserEntity() {
 

@@ -1,0 +1,14 @@
+server:
+  port: 8181
+
+spring:
+  datasource:
+    username: postgres
+    password: Kojax111
+    url: jdbc:postgresql://localhost:5433/autobook
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

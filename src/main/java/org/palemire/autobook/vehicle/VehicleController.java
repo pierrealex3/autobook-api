@@ -5,6 +5,8 @@ import org.palemire.autobook.Constants;
 import org.palemire.autobook.appointment.AppointmentDto;
 import org.palemire.autobook.appointment.AppointmentMapper;
 import org.palemire.autobook.appointment.AppointmentService;
+import org.palemire.autobook.event.EventDto;
+import org.palemire.autobook.event.FetchEventsService;
 import org.palemire.autobook.vehicle.fetch.FetchVehicleService;
 import org.palemire.autobook.vehicle.fetch.VehicleDto;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ public class VehicleController {
     private final FetchVehicleService fetchVehicleService;
     private final AppointmentMapper appointmentMapper;
     private final AppointmentService appointmentService;
+    private final FetchEventsService fetchEventsService;
 
     @GetMapping( path = "/vehicles")
     public ResponseEntity<List<VehicleDto>> getAllVehicles(@RequestHeader("X-MockUser") String userid) {
@@ -46,6 +49,11 @@ public class VehicleController {
         var appointmentEntity = appointmentService.getAppointment(appointmentId);
         var appointmentDto = appointmentMapper.fromEntityToDto(appointmentEntity);
         return new ResponseEntity<>(appointmentDto, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/events")
+    public List<EventDto> getAllEvents(@RequestHeader("X-MockUser") String userid) {
+        return fetchEventsService.getAllEvents(userid);
     }
 
 

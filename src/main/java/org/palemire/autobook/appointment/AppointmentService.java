@@ -13,8 +13,7 @@ public class AppointmentService {
 
     private final VehicleRepository vehicleRepository;
     private final AppointmentRepository appointmentRepository;
-
-
+    private final AppointmentMapper appointmentMapper;
 
     @Transactional
     public void createAppointment(Integer vehicleId, AppointmentEntity appointmentEntity) {
@@ -23,12 +22,13 @@ public class AppointmentService {
         appointmentRepository.save(appointmentEntity);
     }
 
+    @Transactional
+    public void modifyAppointment(Integer appointmentId, AppointmentEntity detachedEntity) {
+        var appointmentEntity = appointmentRepository.findById(appointmentId).orElseThrow(Response400Exception::new);
+        appointmentMapper.fromDetachedToManaged(detachedEntity, appointmentEntity);
+    }
+
     public AppointmentEntity getAppointment(Integer appointmentId) {
-        var appointmentEntityOpt = appointmentRepository.findById(appointmentId);
-        if (appointmentEntityOpt.isEmpty()) {
-            throw new Response400Exception();
-        }
-        else
-            return appointmentEntityOpt.get();
+        return appointmentRepository.findById(appointmentId).orElseThrow(Response400Exception::new);
     }
 }

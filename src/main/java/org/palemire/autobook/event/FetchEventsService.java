@@ -17,7 +17,7 @@ public class FetchEventsService {
     public List<EventDto> getAllEvents(String userId) {
         List<EventDto> eventDtos = new ArrayList<>();
 
-        List<Object[]> domains = (List<Object[]>)fetchEventsDao.fetchAllEvents(userId);
+        List<Object[]> domains = fetchEventsDao.fetchAllEvents(userId);
         for (Object[] domain : domains) {
             var vehicleDomain = (VehicleEntity)domain[0];
             var appointmentDomain = (EventAppointmentDomain)domain[1];

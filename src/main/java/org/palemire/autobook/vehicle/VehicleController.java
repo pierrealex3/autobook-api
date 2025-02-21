@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -49,6 +50,13 @@ public class VehicleController {
         var appointmentEntity = appointmentService.getAppointment(appointmentId);
         var appointmentDto = appointmentMapper.fromEntityToDto(appointmentEntity);
         return new ResponseEntity<>(appointmentDto, HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/appointments/{appointmentId}")
+    public ResponseEntity<Void> modifyAppointment(@PathVariable("appointmentId") Integer appointmentId, @RequestBody AppointmentDto appointmentDto) {
+        var detachedEntity = appointmentMapper.fromDtoToEntity(appointmentDto);
+        appointmentService.modifyAppointment(appointmentId, detachedEntity);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping(path = "/events")

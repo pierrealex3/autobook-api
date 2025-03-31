@@ -2,6 +2,10 @@ server:
   port: 8181
 
 spring:
+  flyway:
+    locations:
+      - classpath:db/migration
+      - classpath:db/sample_data
   datasource:
     username: postgres
     password: Kojax111

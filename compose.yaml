@@ -1,0 +1,25 @@
+version: '3'
+services:
+  wiremock:
+    image: wiremock/wiremock:latest
+    container_name: wiremock-autobook-api
+    ports:
+      - "7778:8080"
+    volumes:
+      - "../wiremock:/home/wiremock"
+    command:
+      - "--enable-browser-proxying"
+
+  db:
+    image: postgres:latest
+    container_name: postgres-autobook-api
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: Kojax111
+      POSTGRES_DB: autobook
+
+
+
+
+

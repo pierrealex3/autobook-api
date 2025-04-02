@@ -82,6 +82,19 @@ create table if not exists piece (
   type VARCHAR(20)
 );
 
+create table if not exists appointment_work_item_piece (
+    id SERIAL primary key,
+    cost numeric(10, 2) default 0.00 not null,
+    appointment_work_item_id INTEGER,
+    piece_id INTEGER,
+    constraint fk_work_item_2
+      foreign key (appointment_work_item_id)
+        references appointment_work_item(id),
+    constraint fk_piece_id
+      foreign key (piece_id)
+        references piece(id)
+);
+
 CREATE TABLE IF NOT EXISTS piece_vehicle_asso (
   piece_id INTEGER,
   vehicle_id INTEGER,

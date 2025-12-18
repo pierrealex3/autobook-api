@@ -79,20 +79,38 @@ create table if not exists piece (
   id SERIAL primary key,
   title VARCHAR(100) not null,
   cost numeric(10, 2) default 0.00 not null,
-  type VARCHAR(20)
+  category VARCHAR(20),
+  manufacturing_date TIMESTAMP
 );
+
+create table if not exists static_piece_operation (
+  id SERIAL primary key,
+  title VARCHAR(20) not null,
+  language VARCHAR(4) not null
+);
+
+insert into static_piece_operation(title, language) values ('INSTALL', 'EN');
+insert into static_piece_operation(title, language) values ('INSTALLATION', 'FR');
+insert into static_piece_operation(title, language) values ('REPAIR', 'EN');
+insert into static_piece_operation(title, language) values ('RÉPARATION', 'FR');
+insert into static_piece_operation(title, language) values ('REMOVAL', 'EN');
+insert into static_piece_operation(title, language) values ('RETRAIT', 'FR');
 
 create table if not exists appointment_work_item_piece (
     id SERIAL primary key,
     cost numeric(10, 2) default 0.00 not null,
     appointment_work_item_id INTEGER,
     piece_id INTEGER,
+    operation_on_piece_id INTEGER,
     constraint fk_work_item_2
       foreign key (appointment_work_item_id)
         references appointment_work_item(id),
     constraint fk_piece_id
       foreign key (piece_id)
-        references piece(id)
+        references piece(id),
+    constraint fk_operation_on_piece_id
+      foreign key (operation_on_piece_id)
+        references static_piece_operation(id)
 );
 
 CREATE TABLE IF NOT EXISTS piece_vehicle_asso (

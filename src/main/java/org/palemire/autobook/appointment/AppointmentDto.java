@@ -23,5 +23,7 @@ public class AppointmentDto {
 
     private LocalTime time;
 
+    private List<AppointmentWorkItemDto> appointmentWorkItems;
+
     private List<AppointmentNoteDto> appointmentNotes;
 }

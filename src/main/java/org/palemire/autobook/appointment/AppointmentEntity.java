@@ -19,8 +19,8 @@ import org.palemire.autobook.vehicle.cud.VehicleEntity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Table(name = "appointment")
 @Entity
@@ -48,7 +48,12 @@ public class AppointmentEntity {
     @OneToMany(mappedBy = "appointment", orphanRemoval = true)
     @Cascade(CascadeType.ALL)
     @Setter(AccessLevel.NONE)
-    private List<AppointmentNoteEntity> appointmentNotes = new ArrayList<>();
+    private Set<AppointmentNoteEntity> appointmentNotes = new HashSet<>();
+
+    @OneToMany(mappedBy = "appointment", orphanRemoval = true)
+    @Cascade(CascadeType.ALL)
+    @Setter(AccessLevel.NONE)
+    private Set<AppointmentWorkItemEntity> appointmentWorkItems = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", referencedColumnName = "id")

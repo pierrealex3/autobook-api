@@ -6,7 +6,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", imports = AppointmentWorkItemMapper.class)
 public interface AppointmentMapper {
 
     AppointmentEntity fromDtoToEntity(AppointmentDto dto);
@@ -14,6 +14,7 @@ public interface AppointmentMapper {
     @AfterMapping
     default void linkNotes(@MappingTarget AppointmentEntity appointmentEntity) {
         appointmentEntity.getAppointmentNotes().forEach(an -> an.setAppointment(appointmentEntity));
+        appointmentEntity.getAppointmentWorkItems().forEach(awi -> awi.setAppointment(appointmentEntity));
     }
 
     @InheritInverseConfiguration

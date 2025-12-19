@@ -30,4 +30,19 @@ public class AppointmentNoteEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "appointment_id", referencedColumnName = "id")
     private AppointmentEntity appointment;
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AppointmentNoteEntity other)) return false;
+
+        // actual check
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public final int hashCode() {
+        return getClass().hashCode();
+    }
 }
+

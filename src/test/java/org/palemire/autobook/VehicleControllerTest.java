@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.palemire.autobook.appointment.AppointmentDto;
 import org.palemire.autobook.appointment.AppointmentEntity;
 import org.palemire.autobook.appointment.AppointmentNoteDto;
+import org.palemire.autobook.appointment.AppointmentWorkItemDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,18 +59,26 @@ class VehicleControllerTest {
     @Sql(scripts = "/sql/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     void appointmentWithNotes_createAppointment_expectedAppointmentOnReturn() throws Exception {
 
-        var appointmentTitle = "Oil change";
+        var appointmentTitle = "Warranty service";
         var appointmentNote = "once a year";
         var appointmentDate = LocalDate.of(2025, Month.DECEMBER, 17);
         var appointmentTime = LocalTime.of(9, 0);
         var appointmentNote1 = "Check the tires soon";
         var appointmentNote2 = "Free tire storage for the winter";
+        var appointmentWorkItem1Title = "Oil change";
 
         var dto = AppointmentDto.builder()
                 .title(appointmentTitle)
                 .note(appointmentNote)
                 .date(appointmentDate)
                 .time(appointmentTime)
+                .appointmentWorkItems(
+                        List.of(
+                                AppointmentWorkItemDto.builder()
+                                        .title(appointmentWorkItem1Title)
+                                        .build()
+                        )
+                )
                 .appointmentNotes(
                         List.of(
                                 AppointmentNoteDto.builder().note(appointmentNote1).build(),
@@ -86,7 +95,11 @@ class VehicleControllerTest {
 
         // verify the *targeted i.e. not the whole* state of the database via the entity model
 
-        List<AppointmentEntity> appointmentEntityList = entityManager.createQuery("SELECT ae FROM AppointmentEntity ae LEFT JOIN FETCH ae.appointmentNotes", AppointmentEntity.class).getResultList();
+        List<AppointmentEntity> appointmentEntityList = entityManager.createQuery("""
+        SELECT ae FROM AppointmentEntity ae
+        LEFT JOIN FETCH ae.appointmentNotes an
+        LEFT JOIN FETCH ae.appointmentWorkItems awi
+        """, AppointmentEntity.class).getResultList();
 
         assertThat(appointmentEntityList).hasSize(1);
         var appointmentEntity = appointmentEntityList.get(0);
@@ -94,7 +107,8 @@ class VehicleControllerTest {
         assertThat(appointmentEntity.getNote()).isEqualTo(appointmentNote);
         assertThat(appointmentEntity.getDate()).isEqualTo(appointmentDate);
         assertThat(appointmentEntity.getTime()).isEqualTo(appointmentTime);
-        assertThat(appointmentEntity.getAppointmentNotes()).extracting("note").containsExactlyElementsOf(List.of(appointmentNote1, appointmentNote2));
+        assertThat(appointmentEntity.getAppointmentNotes()).extracting("note").containsExactlyInAnyOrderElementsOf(List.of(appointmentNote1, appointmentNote2));
+        assertThat(appointmentEntity.getAppointmentWorkItems()).extracting("title").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Title));
 
     }
 

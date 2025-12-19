@@ -1,5 +1,6 @@
 package org.palemire.autobook.appointment;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -9,6 +10,11 @@ import org.mapstruct.MappingTarget;
 public interface AppointmentMapper {
 
     AppointmentEntity fromDtoToEntity(AppointmentDto dto);
+
+    @AfterMapping
+    default void linkNotes(@MappingTarget AppointmentEntity appointmentEntity) {
+        appointmentEntity.getAppointmentNotes().forEach(an -> an.setAppointment(appointmentEntity));
+    }
 
     @InheritInverseConfiguration
     AppointmentDto fromEntityToDto(AppointmentEntity entity);

@@ -13,6 +13,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
+
 @Table(name = "appointment_note")
 @Entity
 @Getter
@@ -42,7 +44,7 @@ public class AppointmentNoteEntity {
 
     @Override
     public final int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(id);
     }
 }
 

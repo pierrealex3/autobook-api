@@ -13,6 +13,8 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Objects;
+
 
 @Table(name = "appointment_work_item")
 @Entity
@@ -43,6 +45,6 @@ public class AppointmentWorkItemEntity {
 
     @Override
     public final int hashCode() {
-        return getClass().hashCode();
+        return Objects.hash(id);
     }
 }

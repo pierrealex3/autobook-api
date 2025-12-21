@@ -7,6 +7,8 @@ import org.palemire.autobook.appointment.AppointmentDto;
 import org.palemire.autobook.appointment.AppointmentEntity;
 import org.palemire.autobook.appointment.AppointmentNoteDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemDto;
+import org.palemire.autobook.appointment.AppointmentWorkItemLaborDto;
+import org.palemire.autobook.appointment.AppointmentWorkItemLaborEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +22,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
@@ -67,6 +70,14 @@ class VehicleControllerTest {
         var appointmentNote2 = "Free tire storage for the winter";
         var appointmentWorkItem1Title = "Oil change";
 
+        var appointmentWorkItem1Labor1Title = "Empty old oil";
+        var appointmentWorkItem1Labor1HoursWorked = new BigDecimal("0.50");
+        var appointmentWorkItem1Labor1Cost = new BigDecimal("25.50");
+
+        var appointmentWorkItem1Labor2Title = "Fill with new oil";
+        var appointmentWorkItem1Labor2HoursWorked = new BigDecimal("0.75");
+        var appointmentWorkItem1Labor2Cost = new BigDecimal("30.11");
+
         var dto = AppointmentDto.builder()
                 .title(appointmentTitle)
                 .note(appointmentNote)
@@ -76,6 +87,20 @@ class VehicleControllerTest {
                         List.of(
                                 AppointmentWorkItemDto.builder()
                                         .title(appointmentWorkItem1Title)
+                                        .appointmentWorkItemsLabor(
+                                                List.of(
+                                                        AppointmentWorkItemLaborDto.builder()
+                                                                .title(appointmentWorkItem1Labor1Title)
+                                                                .hoursWorked(appointmentWorkItem1Labor1HoursWorked)
+                                                                .cost(appointmentWorkItem1Labor1Cost)
+                                                                .build(),
+                                                        AppointmentWorkItemLaborDto.builder()
+                                                                .title(appointmentWorkItem1Labor2Title)
+                                                                .hoursWorked(appointmentWorkItem1Labor2HoursWorked)
+                                                                .cost(appointmentWorkItem1Labor2Cost)
+                                                                .build()
+                                                )
+                                        )
                                         .build()
                         )
                 )
@@ -99,6 +124,7 @@ class VehicleControllerTest {
         SELECT ae FROM AppointmentEntity ae
         LEFT JOIN FETCH ae.appointmentNotes an
         LEFT JOIN FETCH ae.appointmentWorkItems awi
+        LEFT JOIN FETCH awi.appointmentWorkItemsLabor awil
         """, AppointmentEntity.class).getResultList();
 
         assertThat(appointmentEntityList).hasSize(1);
@@ -109,6 +135,12 @@ class VehicleControllerTest {
         assertThat(appointmentEntity.getTime()).isEqualTo(appointmentTime);
         assertThat(appointmentEntity.getAppointmentNotes()).extracting("note").containsExactlyInAnyOrderElementsOf(List.of(appointmentNote1, appointmentNote2));
         assertThat(appointmentEntity.getAppointmentWorkItems()).extracting("title").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Title));
+
+        List<AppointmentWorkItemLaborEntity> appointmentWorkItemLaborEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awie -> awie.getAppointmentWorkItemsLabor().stream()).toList();
+        assertThat(appointmentWorkItemLaborEntities).hasSize(2);
+        assertThat(appointmentWorkItemLaborEntities).extracting("title").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Labor1Title, appointmentWorkItem1Labor2Title));
+        assertThat(appointmentWorkItemLaborEntities).extracting("hoursWorked").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Labor1HoursWorked, appointmentWorkItem1Labor2HoursWorked));
+        assertThat(appointmentWorkItemLaborEntities).extracting("cost").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Labor1Cost, appointmentWorkItem1Labor2Cost)); // TODO  verify how to apply a custom comparator for this use case to prevent BigDecimal 0.50 vs BigDecimal 0.5 to fail !
 
     }
 

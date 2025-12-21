@@ -8,46 +8,42 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
 
-import java.util.HashSet;
+import java.math.BigDecimal;
 import java.util.Objects;
-import java.util.Set;
 
-
-@Table(name = "appointment_work_item")
+@Table(name = "appointment_work_item_labor")
 @Entity
 @Getter
 @Setter
-public class AppointmentWorkItemEntity {
+public class AppointmentWorkItemLaborEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
-    private Integer id;
+    @Setter(value = AccessLevel.NONE)
+    private Long id;
 
     @Column(name = "title")
     private String title;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "appointment_id")
-    private AppointmentEntity appointment;
+    @Column(name = "hours_worked")
+    private BigDecimal hoursWorked;
 
-    @OneToMany(mappedBy = "appointmentWorkItem", orphanRemoval = true)
-    @Cascade(CascadeType.ALL)
-    @Setter(AccessLevel.NONE)
-    private Set<AppointmentWorkItemLaborEntity> appointmentWorkItemsLabor = new HashSet<>();
+    @Column(name = "cost")
+    private BigDecimal cost;
+
+    @JoinColumn(name = "appointment_work_item_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private AppointmentWorkItemEntity appointmentWorkItem;
 
     @Override
     public final boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AppointmentWorkItemEntity other)) return false;
+        if (!(o instanceof AppointmentWorkItemLaborEntity other)) return false;
 
         // actual check
         return id != null && id.equals(other.id);

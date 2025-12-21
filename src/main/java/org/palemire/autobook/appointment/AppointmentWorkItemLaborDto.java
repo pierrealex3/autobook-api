@@ -5,15 +5,15 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.jackson.Jacksonized;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @Builder
 @Jacksonized
 @Getter
 @Setter
-public class AppointmentWorkItemDto {
+public class AppointmentWorkItemLaborDto {
 
     private String title;
-
-    private List<AppointmentWorkItemLaborDto> appointmentWorkItemsLabor;
+    private BigDecimal hoursWorked;
+    private BigDecimal cost;
 }

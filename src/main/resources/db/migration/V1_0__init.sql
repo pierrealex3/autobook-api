@@ -63,6 +63,7 @@ create table if not exists appointment_work_item (
 
 create table if not exists appointment_work_item_labor (
     id SERIAL primary key,
+    title VARCHAR(100) not null,
     cost numeric(10, 2) default 0.00 not null,
     hours_worked numeric (6, 2),
     appointment_work_item_id INTEGER,

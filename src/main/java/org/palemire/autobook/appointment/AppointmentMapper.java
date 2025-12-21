@@ -1,23 +1,22 @@
 package org.palemire.autobook.appointment;
 
 import org.mapstruct.AfterMapping;
-import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring", imports = AppointmentWorkItemMapper.class)
+@Mapper(componentModel = "spring", uses = AppointmentWorkItemMapper.class)
 public interface AppointmentMapper {
 
+    @Mapping(target = "appointmentWorkItems", source = "appointmentWorkItems", qualifiedByName = "appointmentWorkItemMapperDtoToEntity")
     AppointmentEntity fromDtoToEntity(AppointmentDto dto);
 
     @AfterMapping
-    default void linkNotes(@MappingTarget AppointmentEntity appointmentEntity) {
+    default void linkBackreferences(@MappingTarget AppointmentEntity appointmentEntity) {
         appointmentEntity.getAppointmentNotes().forEach(an -> an.setAppointment(appointmentEntity));
         appointmentEntity.getAppointmentWorkItems().forEach(awi -> awi.setAppointment(appointmentEntity));
     }
 
-    @InheritInverseConfiguration
     AppointmentDto fromEntityToDto(AppointmentEntity entity);
 
     @Mapping(target = "id", ignore = true)

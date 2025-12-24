@@ -86,32 +86,61 @@ create table if not exists piece (
 
 create table if not exists static_piece_operation (
   id SERIAL primary key,
-  title VARCHAR(20) not null,
-  language VARCHAR(4) not null
+  title_EN VARCHAR(20) not null,
+  title_FR VARCHAR(20) not null
 );
 
-insert into static_piece_operation(title, language) values ('INSTALL', 'EN');
-insert into static_piece_operation(title, language) values ('INSTALLATION', 'FR');
-insert into static_piece_operation(title, language) values ('REPAIR', 'EN');
-insert into static_piece_operation(title, language) values ('RÉPARATION', 'FR');
-insert into static_piece_operation(title, language) values ('REMOVAL', 'EN');
-insert into static_piece_operation(title, language) values ('RETRAIT', 'FR');
+insert into static_piece_operation(title_EN, title_FR) values ('BUY', 'ACHAT');
+insert into static_piece_operation(title_EN, title_FR) values ('INSTALL', 'INSTALLATION');
+insert into static_piece_operation(title_EN, title_FR) values ('REPAIR', 'RÉPARATION');
+insert into static_piece_operation(title_EN, title_FR) values ('REMOVAL', 'RETRAIT');
 
 create table if not exists appointment_work_item_piece (
     id SERIAL primary key,
-    cost numeric(10, 2) default 0.00 not null,
+    category VARCHAR(20) not null,
+    title VARCHAR(100) not null,
     appointment_work_item_id INTEGER,
     piece_id INTEGER,
-    operation_on_piece_id INTEGER,
+    piece_operation_id INTEGER,
     constraint fk_work_item_2
       foreign key (appointment_work_item_id)
         references appointment_work_item(id),
     constraint fk_piece_id
       foreign key (piece_id)
-        references piece(id),
-    constraint fk_operation_on_piece_id
-      foreign key (operation_on_piece_id)
-        references static_piece_operation(id)
+        references piece(id)
+);
+
+create table if not exists appointment_work_item_piece_buy (
+  id INTEGER primary key,
+  cost numeric(10, 2) default 0.00 not null,
+  constraint fk_id_appointment_work_item_piece_buy
+      foreign key (id)
+        references appointment_work_item_piece(id)
+        ON DELETE CASCADE
+);
+
+create table if not exists appointment_work_item_piece_install (
+  id INTEGER primary key,
+  constraint fk_id_appointment_work_item_piece_install
+      foreign key (id)
+        references appointment_work_item_piece(id)
+        ON DELETE CASCADE
+);
+
+create table if not exists appointment_work_item_piece_repair (
+  id INTEGER primary key,
+  constraint fk_id_appointment_work_item_piece_repair
+      foreign key (id)
+        references appointment_work_item_piece(id)
+        ON DELETE CASCADE
+);
+
+create table if not exists appointment_work_item_piece_removal (
+  id INTEGER primary key,
+  constraint fk_id_appointment_work_item_piece_removal
+      foreign key (id)
+        references appointment_work_item_piece(id)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS piece_vehicle_asso (
@@ -130,19 +159,15 @@ CREATE TABLE IF NOT EXISTS piece_vehicle_asso (
 
 create table if not exists static_tire_season (
   id SERIAL primary key,
-  title VARCHAR(20) not null,
-  language VARCHAR(4) not null
+  title_EN VARCHAR(20) not null,
+  title_FR VARCHAR(20) not null
 );
 
-insert into static_tire_season(title, language) values ('ALL-SEASON', 'EN');
-insert into static_tire_season(title, language) values ('QUATRE SAISONS', 'FR');
-insert into static_tire_season(title, language) values ('WINTER', 'EN');
-insert into static_tire_season(title, language) values ('HIVER', 'FR');
-insert into static_tire_season(title, language) values ('SUMMER', 'EN');
-insert into static_tire_season(title, language) values ('ÉTÉ', 'FR');
+insert into static_tire_season(title_EN, title_FR) values ('ALL-SEASON', 'QUATRE SAISONS');
+insert into static_tire_season(title_EN, title_FR) values ('WINTER', 'HIVER');
+insert into static_tire_season(title_EN, title_FR) values ('SUMMER', 'ÉTÉ');
 
-
-create table if not exists piece_type_tire (
+create table if not exists piece_tire (
   id INTEGER primary key,
   tire_season_id integer,
   brand varchar(20),

@@ -9,6 +9,9 @@ import org.palemire.autobook.appointment.AppointmentNoteDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemLaborDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemLaborEntity;
+import org.palemire.autobook.appointment.AppointmentWorkItemPieceBuyDto;
+import org.palemire.autobook.appointment.AppointmentWorkItemPieceEntity;
+import org.palemire.autobook.appointment.PieceEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -78,6 +82,16 @@ class VehicleControllerTest {
         var appointmentWorkItem1Labor2HoursWorked = new BigDecimal("0.75");
         var appointmentWorkItem1Labor2Cost = new BigDecimal("30.11");
 
+        var appointmentWorkItem1Piece1Title = "Oil pints";
+        var appointmentWorkItem1Piece1Category = "buy";
+        var appointmentWorkItem1Piece1Cost = new BigDecimal("11.11");
+        Long appointmentWorkItem1Piece1PieceId = null;
+
+        String appointmentWorkItem1Piece2Title = "Stronger Oil filter ";
+        var appointmentWorkItem1Piece2Category = "buy";
+        var appointmentWorkItem1Piece2Cost = new BigDecimal("110.11");
+        Long appointmentWorkItem1Piece2PieceId = 1L;
+
         var dto = AppointmentDto.builder()
                 .title(appointmentTitle)
                 .note(appointmentNote)
@@ -98,6 +112,22 @@ class VehicleControllerTest {
                                                                 .title(appointmentWorkItem1Labor2Title)
                                                                 .hoursWorked(appointmentWorkItem1Labor2HoursWorked)
                                                                 .cost(appointmentWorkItem1Labor2Cost)
+                                                                .build()
+                                                )
+                                        )
+                                        .appointmentWorkItemsPiece(
+                                                List.of(
+                                                        AppointmentWorkItemPieceBuyDto.builder()
+                                                                .title(appointmentWorkItem1Piece1Title)
+                                                                .category(appointmentWorkItem1Piece1Category)  // NEEDS to be specified IN THE TEST because this object we build will be translated to a JSON String
+                                                                .cost(appointmentWorkItem1Piece1Cost)
+                                                                .pieceId(appointmentWorkItem1Piece1PieceId)
+                                                                .build(),
+                                                        AppointmentWorkItemPieceBuyDto.builder()
+                                                                .title(appointmentWorkItem1Piece2Title)
+                                                                .category(appointmentWorkItem1Piece2Category)  // NEEDS to be specified IN THE TEST because this object we build will be translated to a JSON String
+                                                                .cost(appointmentWorkItem1Piece2Cost)
+                                                                .pieceId(appointmentWorkItem1Piece2PieceId)
                                                                 .build()
                                                 )
                                         )
@@ -125,6 +155,7 @@ class VehicleControllerTest {
         LEFT JOIN FETCH ae.appointmentNotes an
         LEFT JOIN FETCH ae.appointmentWorkItems awi
         LEFT JOIN FETCH awi.appointmentWorkItemsLabor awil
+        LEFT JOIN FETCH awi.appointmentWorkItemsPiece awip
         """, AppointmentEntity.class).getResultList();
 
         assertThat(appointmentEntityList).hasSize(1);
@@ -141,6 +172,11 @@ class VehicleControllerTest {
         assertThat(appointmentWorkItemLaborEntities).extracting("title").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Labor1Title, appointmentWorkItem1Labor2Title));
         assertThat(appointmentWorkItemLaborEntities).extracting("hoursWorked").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Labor1HoursWorked, appointmentWorkItem1Labor2HoursWorked));
         assertThat(appointmentWorkItemLaborEntities).extracting("cost").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Labor1Cost, appointmentWorkItem1Labor2Cost)); // TODO  verify how to apply a custom comparator for this use case to prevent BigDecimal 0.50 vs BigDecimal 0.5 to fail !
+
+        List<AppointmentWorkItemPieceEntity> appointmentWorkItemPieceEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awie -> awie.getAppointmentWorkItemsPiece().stream()).toList();
+        assertThat(appointmentWorkItemPieceEntities).hasSize(2);
+        assertThat(appointmentWorkItemPieceEntities).extracting("title").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Piece1Title, appointmentWorkItem1Piece2Title));
+        assertThat(appointmentWorkItemPieceEntities.stream().map(AppointmentWorkItemPieceEntity::getPiece).filter(Objects::nonNull).map(PieceEntity::getId)).containsOnly(appointmentWorkItem1Piece2PieceId);
 
     }
 

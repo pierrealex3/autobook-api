@@ -16,4 +16,8 @@ public class AppointmentWorkItemDto {
     private String title;
 
     private List<AppointmentWorkItemLaborDto> appointmentWorkItemsLabor;
+
+    private List<AppointmentWorkItemPieceDto> appointmentWorkItemsPiece;
+
+
 }

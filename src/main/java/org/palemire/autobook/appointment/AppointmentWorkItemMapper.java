@@ -17,17 +17,15 @@ public abstract class AppointmentWorkItemMapper {
     @Autowired
     protected PieceRepository pieceRepository;
 
+    /**
+     * MAPPINGS: dto to entity
+     */
+
     @Named("appointmentWorkItemMapperDtoToEntity")
     abstract Set<AppointmentWorkItemEntity> fromDtoToEntity(List<AppointmentWorkItemDto> dto);
 
     @Mapping(target = "appointmentWorkItem", ignore = true)
     abstract AppointmentWorkItemLaborEntity fromDtoToEntity(AppointmentWorkItemLaborDto dto);
-
-//    @SubclassMapping(target = AppointmentWorkItemPieceBuyEntity.class, source = AppointmentWorkItemPieceBuyDto.class)
-//    @SubclassMapping(target = AppointmentWorkItemPieceInstallEntity.class, source = AppointmentWorkItemPieceInstallDto.class)
-//    @SubclassMapping(target = AppointmentWorkItemPieceRemovalEntity.class, source = AppointmentWorkItemPieceRemovalDto.class)
-//    @SubclassMapping(target = AppointmentWorkItemPieceRepairEntity.class, source = AppointmentWorkItemPieceRepairDto.class)
-//    abstract AppointmentWorkItemPieceEntity fromDtoToEntity(AppointmentWorkItemPieceDto dto);
 
     // TODO this method cannot be the best solution possible... can't believe MapStruct cannot generate this kinda stuff.  FIND IT.
     AppointmentWorkItemPieceEntity fromDtoToEntity(AppointmentWorkItemPieceDto dto) {
@@ -73,5 +71,36 @@ public abstract class AppointmentWorkItemMapper {
         else
             throw new Response400Exception("Piece ID specified: (%d) does not exist".formatted(pieceInDto));
     }
+
+    /**
+     * MAPPINGS: entity to dto
+     */
+
+    @Named("appointmentWorkItemMapperEntityToDto")
+    abstract List<AppointmentWorkItemDto> fromEntityToDto(Set<AppointmentWorkItemEntity> entity);
+
+    AppointmentWorkItemPieceDto fromEntityToDto(AppointmentWorkItemPieceEntity entity) {
+        if (entity instanceof AppointmentWorkItemPieceBuyEntity entityx)
+            return fromEntityToDto(entityx);
+        else if (entity instanceof AppointmentWorkItemPieceInstallEntity entityx)
+            return fromEntityToDto(entityx);
+        else if (entity instanceof AppointmentWorkItemPieceRemovalEntity entityx)
+            return fromEntityToDto(entityx);
+        else if (entity instanceof AppointmentWorkItemPieceRepairEntity entityx)
+            return fromEntityToDto(entityx);
+        else throw new IllegalStateException("Cannot map unmanaged subtype of AppointmentWorkItemPieceEntity");
+    }
+
+    @Mapping(target = "pieceId", source = "piece.id")
+    abstract AppointmentWorkItemPieceBuyDto fromEntityToDto(AppointmentWorkItemPieceBuyEntity entity);
+
+    @Mapping(target = "pieceId", source = "piece.id")
+    abstract AppointmentWorkItemPieceInstallDto fromEntityToDto(AppointmentWorkItemPieceInstallEntity entity);
+
+    @Mapping(target = "pieceId", source = "piece.id")
+    abstract AppointmentWorkItemPieceRemovalDto fromEntityToDto(AppointmentWorkItemPieceRemovalEntity entity);
+
+    @Mapping(target = "pieceId", source = "piece.id")
+    abstract AppointmentWorkItemPieceRepairDto fromEntityToDto(AppointmentWorkItemPieceRepairEntity entity);
 
 }

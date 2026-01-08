@@ -17,7 +17,7 @@ public interface AppointmentMapper {
         appointmentEntity.getAppointmentWorkItems().forEach(awi -> awi.setAppointment(appointmentEntity));
     }
 
-    @Mapping(target = "appointmentWorkItems", ignore = true)  // TODO fix
+    @Mapping(target = "appointmentWorkItems", source = "appointmentWorkItems", qualifiedByName = "appointmentWorkItemMapperEntityToDto")
     AppointmentDto fromEntityToDto(AppointmentEntity entity);
 
     @Mapping(target = "id", ignore = true)

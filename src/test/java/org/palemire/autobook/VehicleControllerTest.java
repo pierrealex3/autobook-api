@@ -11,7 +11,6 @@ import org.palemire.autobook.appointment.AppointmentWorkItemLaborDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemLaborEntity;
 import org.palemire.autobook.appointment.AppointmentWorkItemPieceBuyDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemPieceEntity;
-import org.palemire.autobook.appointment.PieceEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,7 +32,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -61,10 +61,18 @@ class VehicleControllerTest {
     @Autowired
     EntityManager entityManager;
 
+    /**
+     * The natural flow: CREATE -> UPDATE -> GET Appointment has all been included in a single integration test, for the sake of simplicity.
+     * @throws Exception
+     */
     @Test
     @Sql(scripts = "/sql/insertUserAndVehicle.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
     @Sql(scripts = "/sql/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-    void appointmentWithNotes_createAppointment_expectedAppointmentOnReturn() throws Exception {
+    void appointmentWithNotes_createThenUpdateThenGetAppointment_expectedDatabaseContentAndExpectedDtoReturned() throws Exception {
+
+        /**
+         * API call to CREATE the whole appointment resource
+         */
 
         var appointmentTitle = "Warranty service";
         var appointmentNote = "once a year";
@@ -92,7 +100,7 @@ class VehicleControllerTest {
         var appointmentWorkItem1Piece2Cost = new BigDecimal("110.11");
         Long appointmentWorkItem1Piece2PieceId = 1L;
 
-        var dto = AppointmentDto.builder()
+        var dtoForCreate = AppointmentDto.builder()
                 .title(appointmentTitle)
                 .note(appointmentNote)
                 .date(appointmentDate)
@@ -144,19 +152,13 @@ class VehicleControllerTest {
         mockMvc.perform(
                 post(Constants.AUTOBOOK_API_ROOT + "/vehicles/1/appointment")
                         .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(dto))
+                                .content(objectMapper.writeValueAsString(dtoForCreate))
                 )
                 .andExpect(status().isCreated());
 
         // verify the *targeted i.e. not the whole* state of the database via the entity model
 
-        List<AppointmentEntity> appointmentEntityList = entityManager.createQuery("""
-        SELECT ae FROM AppointmentEntity ae
-        LEFT JOIN FETCH ae.appointmentNotes an
-        LEFT JOIN FETCH ae.appointmentWorkItems awi
-        LEFT JOIN FETCH awi.appointmentWorkItemsLabor awil
-        LEFT JOIN FETCH awi.appointmentWorkItemsPiece awip
-        """, AppointmentEntity.class).getResultList();
+        List<AppointmentEntity> appointmentEntityList = fetchWholeAppointmentEntityModel();
 
         assertThat(appointmentEntityList).hasSize(1);
         var appointmentEntity = appointmentEntityList.get(0);
@@ -168,16 +170,229 @@ class VehicleControllerTest {
         assertThat(appointmentEntity.getAppointmentWorkItems()).extracting("title").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Title));
 
         List<AppointmentWorkItemLaborEntity> appointmentWorkItemLaborEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awie -> awie.getAppointmentWorkItemsLabor().stream()).toList();
-        assertThat(appointmentWorkItemLaborEntities).hasSize(2);
-        assertThat(appointmentWorkItemLaborEntities).extracting("title").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Labor1Title, appointmentWorkItem1Labor2Title));
-        assertThat(appointmentWorkItemLaborEntities).extracting("hoursWorked").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Labor1HoursWorked, appointmentWorkItem1Labor2HoursWorked));
-        assertThat(appointmentWorkItemLaborEntities).extracting("cost").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Labor1Cost, appointmentWorkItem1Labor2Cost)); // TODO  verify how to apply a custom comparator for this use case to prevent BigDecimal 0.50 vs BigDecimal 0.5 to fail !
+
+        assertThat(appointmentWorkItemLaborEntities)
+                .hasSize(2)
+                .allMatch(awile ->
+                appointmentWorkItem1Labor1Title.equals(awile.getTitle()) &&
+                        appointmentWorkItem1Labor1HoursWorked.compareTo(awile.getHoursWorked()) == 0 &&
+                        appointmentWorkItem1Labor1Cost.compareTo(awile.getCost()) == 0
+                        ||
+                        appointmentWorkItem1Labor2Title.equals(awile.getTitle()) &&
+                                appointmentWorkItem1Labor2HoursWorked.compareTo(awile.getHoursWorked()) == 0 &&
+                                appointmentWorkItem1Labor2Cost.compareTo(awile.getCost()) == 0
+        );
 
         List<AppointmentWorkItemPieceEntity> appointmentWorkItemPieceEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awie -> awie.getAppointmentWorkItemsPiece().stream()).toList();
-        assertThat(appointmentWorkItemPieceEntities).hasSize(2);
-        assertThat(appointmentWorkItemPieceEntities).extracting("title").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Piece1Title, appointmentWorkItem1Piece2Title));
-        assertThat(appointmentWorkItemPieceEntities.stream().map(AppointmentWorkItemPieceEntity::getPiece).filter(Objects::nonNull).map(PieceEntity::getId)).containsOnly(appointmentWorkItem1Piece2PieceId);
 
+        assertThat(appointmentWorkItemPieceEntities)
+                .hasSize(2)
+                .allMatch(awipe ->
+                        appointmentWorkItem1Piece1Title.equals(awipe.getTitle()) &&
+                                Objects.isNull(awipe.getPiece())
+                ||
+                                appointmentWorkItem1Piece2Title.equals(awipe.getTitle()) &&
+                                        appointmentWorkItem1Piece2PieceId.equals(awipe.getPiece().getId())
+        );
+
+
+        /**
+         * API call to UPDATE the whole appointment resource
+          */
+
+        var appointmentDateU = LocalDate.of(2025, Month.DECEMBER, 18);
+
+        var appointmentWorkItem1Labor2TitleU = "Oil refill";
+        var appointmentWorkItem1Labor2HoursWorkedU = new BigDecimal("0.79");
+        var appointmentWorkItem1Labor2CostU = new BigDecimal("30.11");
+
+        // one more item
+        var appointmentWorkItem1Labor3TitleU = "Cleanup";
+        var appointmentWorkItem1Labor3HoursWorkedU = new BigDecimal("0.48");
+        var appointmentWorkItem1Labor3CostU = new BigDecimal("30.11");
+
+        var dtoForUpdate = AppointmentDto.builder()
+                .title(appointmentTitle)
+                .note(appointmentNote)
+                .date(appointmentDateU)  // Updated
+                .time(appointmentTime)
+                .appointmentWorkItems(
+                        List.of(
+                                AppointmentWorkItemDto.builder()
+                                        .title(appointmentWorkItem1Title)
+                                        .appointmentWorkItemsLabor(
+                                                List.of(
+                                                        AppointmentWorkItemLaborDto.builder()
+                                                                .title(appointmentWorkItem1Labor1Title)
+                                                                .hoursWorked(appointmentWorkItem1Labor1HoursWorked)
+                                                                .cost(appointmentWorkItem1Labor1Cost)
+                                                                .build(),
+                                                        AppointmentWorkItemLaborDto.builder() // Updated
+                                                                .title(appointmentWorkItem1Labor2TitleU)
+                                                                .hoursWorked(appointmentWorkItem1Labor2HoursWorkedU)
+                                                                .cost(appointmentWorkItem1Labor2CostU)
+                                                                .build(),
+                                                        AppointmentWorkItemLaborDto.builder() // Added
+                                                                .title(appointmentWorkItem1Labor3TitleU)
+                                                                .hoursWorked(appointmentWorkItem1Labor3HoursWorkedU)
+                                                                .cost(appointmentWorkItem1Labor3CostU)
+                                                                .build()
+                                                )
+                                        )
+                                        .appointmentWorkItemsPiece(
+                                                List.of(
+                                                        AppointmentWorkItemPieceBuyDto.builder()
+                                                                .title(appointmentWorkItem1Piece1Title)
+                                                                .category(appointmentWorkItem1Piece1Category)  // NEEDS to be specified IN THE TEST because this object we build will be translated to a JSON String
+                                                                .cost(appointmentWorkItem1Piece1Cost)
+                                                                .pieceId(appointmentWorkItem1Piece1PieceId)
+                                                                .build(),
+                                                        AppointmentWorkItemPieceBuyDto.builder()
+                                                                .title(appointmentWorkItem1Piece2Title)
+                                                                .category(appointmentWorkItem1Piece2Category)  // NEEDS to be specified IN THE TEST because this object we build will be translated to a JSON String
+                                                                .cost(appointmentWorkItem1Piece2Cost)
+                                                                .pieceId(appointmentWorkItem1Piece2PieceId)
+                                                                .build()
+                                                )
+                                        )
+                                        .build()
+                        )
+                )
+                .appointmentNotes(
+                        List.of(
+                                AppointmentNoteDto.builder().note(appointmentNote1).build(),
+                                AppointmentNoteDto.builder().note(appointmentNote2).build()
+                        )
+                ).build();
+
+        mockMvc.perform(
+                        put(Constants.AUTOBOOK_API_ROOT + "/appointments/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(dtoForUpdate))
+                )
+                .andExpect(status().isNoContent());
+
+        // verify the *targeted i.e. not the whole* state of the database via the entity model
+
+        appointmentEntityList = fetchWholeAppointmentEntityModel();
+
+        assertThat(appointmentEntityList).hasSize(1);
+        appointmentEntity = appointmentEntityList.get(0);
+        assertThat(appointmentEntity.getTitle()).isEqualTo(appointmentTitle);
+        assertThat(appointmentEntity.getNote()).isEqualTo(appointmentNote);
+        assertThat(appointmentEntity.getDate()).isEqualTo(appointmentDateU); // Updated
+        assertThat(appointmentEntity.getTime()).isEqualTo(appointmentTime);
+        assertThat(appointmentEntity.getAppointmentNotes()).extracting("note").containsExactlyInAnyOrderElementsOf(List.of(appointmentNote1, appointmentNote2));
+        assertThat(appointmentEntity.getAppointmentWorkItems()).extracting("title").containsExactlyInAnyOrderElementsOf(List.of(appointmentWorkItem1Title));
+
+        appointmentWorkItemLaborEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awie -> awie.getAppointmentWorkItemsLabor().stream()).toList();
+
+        assertThat(appointmentWorkItemLaborEntities)
+                .hasSize(3)
+                .allMatch(awile ->
+                        appointmentWorkItem1Labor1Title.equals(awile.getTitle()) &&
+                                appointmentWorkItem1Labor1HoursWorked.compareTo(awile.getHoursWorked()) == 0 &&
+                                appointmentWorkItem1Labor1Cost.compareTo(awile.getCost()) == 0
+                                ||
+                                appointmentWorkItem1Labor2TitleU.equals(awile.getTitle()) &&
+                                        appointmentWorkItem1Labor2HoursWorkedU.compareTo(awile.getHoursWorked()) == 0 &&
+                                        appointmentWorkItem1Labor2CostU.compareTo(awile.getCost()) == 0
+                        ||
+                                appointmentWorkItem1Labor3TitleU.equals(awile.getTitle()) &&
+                                        appointmentWorkItem1Labor3HoursWorkedU.compareTo(awile.getHoursWorked()) == 0 &&
+                                        appointmentWorkItem1Labor3CostU.compareTo(awile.getCost()) == 0
+                );
+
+        appointmentWorkItemPieceEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awie -> awie.getAppointmentWorkItemsPiece().stream()).toList();
+
+        assertThat(appointmentWorkItemPieceEntities)
+                .hasSize(2)
+                .allMatch(awipe ->
+                        appointmentWorkItem1Piece1Title.equals(awipe.getTitle()) &&
+                                Objects.isNull(awipe.getPiece())
+                                ||
+                                appointmentWorkItem1Piece2Title.equals(awipe.getTitle()) &&
+                                        appointmentWorkItem1Piece2PieceId.equals(awipe.getPiece().getId())
+                );
+
+        /**
+         * API call to GET the whole appointment resource
+         */
+
+        mockMvc.perform(
+                        get(Constants.AUTOBOOK_API_ROOT + "/appointments/1")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header("X-MockUser", "me@whoami.com")
+                                .content(objectMapper.writeValueAsString(dtoForUpdate))
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                    {
+                      "title": "Warranty service",
+                      "note": "once a year",
+                      "date": "2025-12-18",
+                      "time": "09:00:00",
+                      "appointmentWorkItems": [
+                        {
+                          "title": "Oil change",
+                          "appointmentWorkItemsLabor": [
+                            {
+                              "title": "Empty old oil",
+                              "hoursWorked": 0.50,
+                              "cost": 25.50
+                            },
+                            {
+                              "title": "Oil refill",
+                              "hoursWorked": 0.79,
+                              "cost": 30.11
+                            },
+                            {
+                              "title": "Cleanup",
+                              "hoursWorked": 0.48,
+                              "cost": 30.11
+                            }
+                          ],
+                          "appointmentWorkItemsPiece": [
+                            {
+                              "title": "Oil pints",
+                              "category": null,
+                              "pieceId": null,
+                              "cost": 11.11
+                            },
+                            {
+                              "title": "Stronger Oil filter ",
+                              "category": null,
+                              "pieceId": 1,
+                              "cost": 110.11
+                            }
+                          ]
+                        }
+                      ],
+                      "appointmentNotes": [
+                        {
+                          "note": "Check the tires soon"
+                        },
+                        {
+                          "note": "Free tire storage for the winter"
+                        }
+                      ]
+                    }
+                    """));
+    }
+
+    /**
+     * From this test, it is required to specify LEFT JOIN FETCH statements for every lazy-loaded association.
+     * Without that, the database data required for comparison would be incomplete.
+     * @return the whole appointment database model.
+     */
+    private List<AppointmentEntity> fetchWholeAppointmentEntityModel() {
+        return entityManager.createQuery("""
+        SELECT ae FROM AppointmentEntity ae
+        LEFT JOIN FETCH ae.appointmentNotes an
+        LEFT JOIN FETCH ae.appointmentWorkItems awi
+        LEFT JOIN FETCH awi.appointmentWorkItemsLabor awil
+        LEFT JOIN FETCH awi.appointmentWorkItemsPiece awip
+        """, AppointmentEntity.class).getResultList();
     }
 
 

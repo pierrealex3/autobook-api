@@ -2,6 +2,7 @@ package org.palemire.autobook.vehicle;
 
 import lombok.RequiredArgsConstructor;
 import org.palemire.autobook.Constants;
+import org.palemire.autobook.appointment.AppointmentCreatedDto;
 import org.palemire.autobook.appointment.AppointmentDto;
 import org.palemire.autobook.appointment.AppointmentMapper;
 import org.palemire.autobook.appointment.AppointmentService;
@@ -39,21 +40,22 @@ public class VehicleController {
     }
 
     @PostMapping(path = "/vehicles/{vehicleId}/appointment", consumes = "application/json")
-    public ResponseEntity<Void> createAppointment(@PathVariable("vehicleId") Integer vehicleId, @RequestBody AppointmentDto appointmentDto) {
+    public ResponseEntity<AppointmentCreatedDto> createAppointment(@PathVariable("vehicleId") Integer vehicleId, @RequestBody AppointmentDto appointmentDto) {
         var appointmentEntity = appointmentMapper.fromDtoToEntity(appointmentDto);
         appointmentService.createAppointment(vehicleId, appointmentEntity);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        var appointmentCreatedDto = AppointmentCreatedDto.builder().xid(appointmentEntity.getXid()).build();
+        return new ResponseEntity<>(appointmentCreatedDto, HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/appointments/{appointmentId}")
-    public ResponseEntity<AppointmentDto> getAppointment(@PathVariable("appointmentId") Integer appointmentId) {
+    public ResponseEntity<AppointmentDto> getAppointment(@PathVariable("appointmentId") String appointmentId) {
         var appointmentEntity = appointmentService.getAppointment(appointmentId);
         var appointmentDto = appointmentMapper.fromEntityToDto(appointmentEntity);
         return new ResponseEntity<>(appointmentDto, HttpStatus.OK);
     }
 
     @PutMapping(path = "/appointments/{appointmentId}")
-    public ResponseEntity<Void> modifyAppointment(@PathVariable("appointmentId") Integer appointmentId, @RequestBody AppointmentDto appointmentDto) {
+    public ResponseEntity<Void> modifyAppointment(@PathVariable("appointmentId") String appointmentId, @RequestBody AppointmentDto appointmentDto) {
         var detachedEntity = appointmentMapper.fromDtoToEntity(appointmentDto);
         appointmentService.modifyAppointment(appointmentId, detachedEntity);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);

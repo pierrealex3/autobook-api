@@ -32,6 +32,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.flywaydb:flyway-core'
+	implementation 'de.huxhorn.sulky:de.huxhorn.sulky.ulid:8.3.0'
 
 	implementation 'org.mapstruct:mapstruct:1.6.3'
 

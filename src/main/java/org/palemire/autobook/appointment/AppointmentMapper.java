@@ -9,6 +9,8 @@ import org.mapstruct.MappingTarget;
 public interface AppointmentMapper {
 
     @Mapping(target = "appointmentWorkItems", source = "appointmentWorkItems", qualifiedByName = "appointmentWorkItemMapperDtoToEntity")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "xid", ignore = true)
     AppointmentEntity fromDtoToEntity(AppointmentDto dto);
 
     @AfterMapping
@@ -21,6 +23,7 @@ public interface AppointmentMapper {
     AppointmentDto fromEntityToDto(AppointmentEntity entity);
 
     @Mapping(target = "id", ignore = true)
+    @Mapping(target = "xid", ignore = true)
     @Mapping(target = "vehicle", ignore = true)
     void fromDetachedToManaged(AppointmentEntity detached, @MappingTarget AppointmentEntity managed);
 }

@@ -1,6 +1,7 @@
 package org.palemire.autobook;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.palemire.autobook.appointment.AppointmentDto;
@@ -20,6 +21,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -149,12 +151,16 @@ class VehicleControllerTest {
                         )
                 ).build();
 
-        mockMvc.perform(
+        MvcResult creationResult = mockMvc.perform(
                 post(Constants.AUTOBOOK_API_ROOT + "/vehicles/1/appointment")
                         .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(dtoForCreate))
                 )
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String xid = JsonPath.read(creationResult.getResponse().getContentAsString(), "$.xid");
+        assertThat(xid).isNotBlank();
 
         // verify the *targeted i.e. not the whole* state of the database via the entity model
 
@@ -266,7 +272,7 @@ class VehicleControllerTest {
                 ).build();
 
         mockMvc.perform(
-                        put(Constants.AUTOBOOK_API_ROOT + "/appointments/1")
+                        put(Constants.AUTOBOOK_API_ROOT + "/appointments/" + xid)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(dtoForUpdate))
                 )
@@ -320,7 +326,7 @@ class VehicleControllerTest {
          */
 
         mockMvc.perform(
-                        get(Constants.AUTOBOOK_API_ROOT + "/appointments/1")
+                        get(Constants.AUTOBOOK_API_ROOT + "/appointments/" + xid)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header("X-MockUser", "me@whoami.com")
                                 .content(objectMapper.writeValueAsString(dtoForUpdate))

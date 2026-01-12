@@ -23,12 +23,12 @@ public class AppointmentService {
     }
 
     @Transactional
-    public void modifyAppointment(Integer appointmentId, AppointmentEntity detachedEntity) {
-        var appointmentEntity = appointmentRepository.findById(appointmentId).orElseThrow(Response400Exception::new);
+    public void modifyAppointment(String appointmentId, AppointmentEntity detachedEntity) {
+        var appointmentEntity = appointmentRepository.findByXid(appointmentId).orElseThrow(Response400Exception::new);
         appointmentMapper.fromDetachedToManaged(detachedEntity, appointmentEntity);
     }
 
-    public AppointmentEntity getAppointment(Integer appointmentId) {
-        return appointmentRepository.findById(appointmentId).orElseThrow(Response400Exception::new);
+    public AppointmentEntity getAppointment(String appointmentId) {
+        return appointmentRepository.findByXid(appointmentId).orElseThrow(Response400Exception::new);
     }
 }

@@ -1,5 +1,6 @@
 package org.palemire.autobook.appointment;
 
+import de.huxhorn.sulky.ulid.ULID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -28,10 +30,15 @@ import java.util.Set;
 @Setter
 public class AppointmentEntity {
 
+    private static final ULID ULID_GENERATOR = new ULID();
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.NONE)
     private Integer id;
+
+    @Column(name = "xid")
+    private String xid;
 
     @Column(name = "title")
     private String title;
@@ -58,5 +65,11 @@ public class AppointmentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id", referencedColumnName = "id")
     private VehicleEntity vehicle;
+
+    @PrePersist
+    public void generatexId() {
+        if (xid == null)
+            xid = ULID_GENERATOR.nextULID();
+    }
 
 }

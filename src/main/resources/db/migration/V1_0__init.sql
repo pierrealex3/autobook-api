@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS user_vehicle_asso (
 
 create table if not exists appointment (
   id SERIAL primary key,
+  xid VARCHAR(26) not null,
   title VARCHAR(100) not null,
   note VARCHAR(200),
   date DATE,
@@ -42,6 +43,9 @@ create table if not exists appointment (
     foreign key (vehicle_id)
       references vehicle(id)
 );
+
+/** B-tree index (default) **/
+create index idx_appointment_xid ON appointment(xid);
 
 create table if not exists appointment_note (
   id SERIAL primary key,

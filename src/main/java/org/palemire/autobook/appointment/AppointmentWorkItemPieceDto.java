@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY,
+        include = JsonTypeInfo.As.PROPERTY,
         property = "category"
 )
 @JsonSubTypes({
@@ -22,6 +22,6 @@ import lombok.experimental.SuperBuilder;
 })
 public abstract class AppointmentWorkItemPieceDto {
     private String title;
-    private String category;
-    private Long pieceId;
+//    private String category;
+    private PieceSummaryDto piece;
 }

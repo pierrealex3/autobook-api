@@ -12,6 +12,7 @@ import org.palemire.autobook.appointment.AppointmentWorkItemLaborDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemLaborEntity;
 import org.palemire.autobook.appointment.AppointmentWorkItemPieceBuyDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemPieceEntity;
+import org.palemire.autobook.appointment.PieceSummaryDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -93,14 +94,14 @@ class VehicleControllerTest {
         var appointmentWorkItem1Labor2Cost = new BigDecimal("30.11");
 
         var appointmentWorkItem1Piece1Title = "Oil pints";
-        var appointmentWorkItem1Piece1Category = "buy";
         var appointmentWorkItem1Piece1Cost = new BigDecimal("11.11");
-        Long appointmentWorkItem1Piece1PieceId = null;
 
         String appointmentWorkItem1Piece2Title = "Stronger Oil filter ";
-        var appointmentWorkItem1Piece2Category = "buy";
         var appointmentWorkItem1Piece2Cost = new BigDecimal("110.11");
+
         Long appointmentWorkItem1Piece2PieceId = 1L;
+        var appointmentWorkItem1Piece2PieceTitle = "Winter tires";
+        var appointmentWorkItem1Piece2PieceCategory = "TIRE";
 
         var dtoForCreate = AppointmentDto.builder()
                 .title(appointmentTitle)
@@ -129,15 +130,18 @@ class VehicleControllerTest {
                                                 List.of(
                                                         AppointmentWorkItemPieceBuyDto.builder()
                                                                 .title(appointmentWorkItem1Piece1Title)
-                                                                .category(appointmentWorkItem1Piece1Category)  // NEEDS to be specified IN THE TEST because this object we build will be translated to a JSON String
                                                                 .cost(appointmentWorkItem1Piece1Cost)
-                                                                .pieceId(appointmentWorkItem1Piece1PieceId)
+                                                                // piece is null
                                                                 .build(),
                                                         AppointmentWorkItemPieceBuyDto.builder()
                                                                 .title(appointmentWorkItem1Piece2Title)
-                                                                .category(appointmentWorkItem1Piece2Category)  // NEEDS to be specified IN THE TEST because this object we build will be translated to a JSON String
                                                                 .cost(appointmentWorkItem1Piece2Cost)
-                                                                .pieceId(appointmentWorkItem1Piece2PieceId)
+                                                                .piece(PieceSummaryDto.builder()
+                                                                        .id(appointmentWorkItem1Piece2PieceId)
+                                                                        .title(appointmentWorkItem1Piece2PieceTitle)
+                                                                        .category(appointmentWorkItem1Piece2PieceCategory)
+                                                                        .build()
+                                                                )
                                                                 .build()
                                                 )
                                         )
@@ -249,15 +253,19 @@ class VehicleControllerTest {
                                                 List.of(
                                                         AppointmentWorkItemPieceBuyDto.builder()
                                                                 .title(appointmentWorkItem1Piece1Title)
-                                                                .category(appointmentWorkItem1Piece1Category)  // NEEDS to be specified IN THE TEST because this object we build will be translated to a JSON String
                                                                 .cost(appointmentWorkItem1Piece1Cost)
-                                                                .pieceId(appointmentWorkItem1Piece1PieceId)
+                                                                // piece is null
                                                                 .build(),
                                                         AppointmentWorkItemPieceBuyDto.builder()
                                                                 .title(appointmentWorkItem1Piece2Title)
-                                                                .category(appointmentWorkItem1Piece2Category)  // NEEDS to be specified IN THE TEST because this object we build will be translated to a JSON String
                                                                 .cost(appointmentWorkItem1Piece2Cost)
-                                                                .pieceId(appointmentWorkItem1Piece2PieceId)
+                                                                .piece(
+                                                                        PieceSummaryDto.builder()
+                                                                                .id(appointmentWorkItem1Piece2PieceId)
+                                                                                .title(appointmentWorkItem1Piece2PieceTitle)
+                                                                                .category(appointmentWorkItem1Piece2PieceCategory)
+                                                                                .build()
+                                                                )
                                                                 .build()
                                                 )
                                         )
@@ -361,14 +369,18 @@ class VehicleControllerTest {
                           "appointmentWorkItemsPiece": [
                             {
                               "title": "Oil pints",
-                              "category": null,
-                              "pieceId": null,
+                              "category": "buy",
+                              "piece": null,
                               "cost": 11.11
                             },
                             {
                               "title": "Stronger Oil filter ",
-                              "category": null,
-                              "pieceId": 1,
+                              "category": "buy",
+                              "piece": {
+                                "id": 1,
+                                "title": "Winter tires",
+                                "category": "TIRE"
+                              },
                               "cost": 110.11
                             }
                           ]

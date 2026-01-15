@@ -5,10 +5,12 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
+import org.mapstruct.NullValueCheckStrategy;
 import org.palemire.autobook.Response400Exception;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Mapper(componentModel = "spring")
@@ -40,19 +42,19 @@ public abstract class AppointmentWorkItemMapper {
         else throw new IllegalStateException("Cannot map unmanaged subtype of AppointmentWorkItemPieceDto");
     }
 
-    @Mapping(target = "piece", source = "pieceId", qualifiedByName = "verifyPieceIdExistsIfSpecified")
+    @Mapping(target = "piece", source = "piece", qualifiedByName = "verifyPieceIdExistsIfSpecified")
     @Mapping(target = "appointmentWorkItem", ignore = true)
     abstract AppointmentWorkItemPieceBuyEntity fromDtoToEntity(AppointmentWorkItemPieceBuyDto dto);
 
-    @Mapping(target = "piece", source = "pieceId", qualifiedByName = "verifyPieceIdExistsIfSpecified")
+    @Mapping(target = "piece", source = "piece", qualifiedByName = "verifyPieceIdExistsIfSpecified")
     @Mapping(target = "appointmentWorkItem", ignore = true)
     abstract AppointmentWorkItemPieceInstallEntity fromDtoToEntity(AppointmentWorkItemPieceInstallDto dto);
 
-    @Mapping(target = "piece", source = "pieceId", qualifiedByName = "verifyPieceIdExistsIfSpecified")
+    @Mapping(target = "piece", source = "piece", qualifiedByName = "verifyPieceIdExistsIfSpecified")
     @Mapping(target = "appointmentWorkItem", ignore = true)
     abstract AppointmentWorkItemPieceRemovalEntity fromDtoToEntity(AppointmentWorkItemPieceRemovalDto dto);
 
-    @Mapping(target = "piece", source = "pieceId", qualifiedByName = "verifyPieceIdExistsIfSpecified")
+    @Mapping(target = "piece", source = "piece", qualifiedByName = "verifyPieceIdExistsIfSpecified")
     @Mapping(target = "appointmentWorkItem", ignore = true)
     abstract AppointmentWorkItemPieceRepairEntity fromDtoToEntity(AppointmentWorkItemPieceRepairDto dto);
 
@@ -63,13 +65,15 @@ public abstract class AppointmentWorkItemMapper {
     }
 
     @Named("verifyPieceIdExistsIfSpecified")
-    PieceEntity verifyPieceIdExistsIfSpecified(Long pieceInDto) {
-        if (pieceInDto == null)
+    PieceEntity verifyPieceIdExistsIfSpecified(PieceSummaryDto pieceInDto) {
+        Long pieceIdInDto = Optional.ofNullable(pieceInDto).map(PieceSummaryDto::getId).orElse(null);
+
+        if (pieceIdInDto == null)
             return null;
-        if (pieceRepository.existsById(pieceInDto))
-            return pieceRepository.getReferenceById(pieceInDto);
+        if (pieceRepository.existsById(pieceIdInDto))
+            return pieceRepository.getReferenceById(pieceIdInDto);
         else
-            throw new Response400Exception("Piece ID specified: (%d) does not exist".formatted(pieceInDto));
+            throw new Response400Exception("Piece ID specified: (%d) does not exist".formatted(pieceIdInDto));
     }
 
     /**
@@ -91,16 +95,25 @@ public abstract class AppointmentWorkItemMapper {
         else throw new IllegalStateException("Cannot map unmanaged subtype of AppointmentWorkItemPieceEntity");
     }
 
-    @Mapping(target = "pieceId", source = "piece.id")
     abstract AppointmentWorkItemPieceBuyDto fromEntityToDto(AppointmentWorkItemPieceBuyEntity entity);
 
-    @Mapping(target = "pieceId", source = "piece.id")
     abstract AppointmentWorkItemPieceInstallDto fromEntityToDto(AppointmentWorkItemPieceInstallEntity entity);
 
-    @Mapping(target = "pieceId", source = "piece.id")
     abstract AppointmentWorkItemPieceRemovalDto fromEntityToDto(AppointmentWorkItemPieceRemovalEntity entity);
 
-    @Mapping(target = "pieceId", source = "piece.id")
     abstract AppointmentWorkItemPieceRepairDto fromEntityToDto(AppointmentWorkItemPieceRepairEntity entity);
+
+    @Mapping(target = "category", source = "entity", qualifiedByName = "categoryDefinitionForPiece", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    abstract PieceSummaryDto fromEntityToDto(PieceEntity entity);
+
+    @Named("categoryDefinitionForPiece")
+    String categoryDefinitionForPiece(PieceEntity piece) {
+        if (piece == null)
+            return null;
+        if (piece instanceof PieceTireEntity)
+            return "TIRE";
+        throw new IllegalStateException("Cannot map unmanaged subtype of PieceEntity");
+    }
+
 
 }

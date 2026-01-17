@@ -1,0 +1,14 @@
+{
+    "request": {
+        "method": "GET",
+        "url": "/autobook/events",
+		"headers": {
+		    "X-MockUser" : {
+			    "equalTo" : "plemire@nuance.com"
+		    }
+	    }
+    },
+    "response": {
+	    "proxyBaseUrl": "http://${WINDOWS_GATEWAY_IP}:${WIREMOCK_FORWARD_PORT}"
+    }
+}

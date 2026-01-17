@@ -1,0 +1,9 @@
+{
+  "request": {
+    "method": "OPTIONS",
+    "urlPathPattern": "/autobook/.*"
+  },
+  "response": {
+    "proxyBaseUrl" : "http://${WINDOWS_GATEWAY_IP}:${WIREMOCK_FORWARD_PORT}"
+  }
+}

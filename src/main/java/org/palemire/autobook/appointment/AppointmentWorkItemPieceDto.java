@@ -22,6 +22,5 @@ import lombok.experimental.SuperBuilder;
 })
 public abstract class AppointmentWorkItemPieceDto {
     private String title;
-//    private String category;
     private PieceSummaryDto piece;
 }

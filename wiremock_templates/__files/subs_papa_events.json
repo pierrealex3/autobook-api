@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "vehicleId": 2,
+    "vehicleTag": "BMW X3 M40i",
+    "date": "2024/03/01",
+    "title": "Buy summer tires",
+    "eventType": "buy_gear"  
+  },
+  {
+    "id": 2,
+    "vehicleId": 2,
+    "vehicleTag": "BMW X3 M40i",
+    "date": "2024/12/28",
+    "title": "Annual oil change",
+    "eventType": "appointment"  
+  },  
+  {
+    "id": 3,
+    "vehicleId": 2,
+    "vehicleTag": "BMW X3 M40i",
+    "date": "2024/05/31",
+    "title": "Scheduled maintenance full coverage END",
+    "eventType": "event"  
+  },
+  {
+    "id": 4,
+    "vehicleId": 1,
+    "vehicleTag": "Audi TT",
+    "date": "2024/06/01",
+    "title": "Annual oil change",
+    "eventType": "appointment"  
+  },    
+  {
+    "id": 5,
+    "vehicleId": 1,
+    "vehicleTag": "Audi TT",
+    "date": "2024/04/15",
+    "title": "Install summer tires",
+    "eventType": "appointment"  
+  }
+]

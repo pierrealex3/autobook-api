@@ -1,0 +1,14 @@
+{
+  "request": {
+    "method": "POST",
+    "url": "/autobook/vehicles"
+  },
+  "response": {
+    "status": 204,
+    "headers": {
+      "Content-Type": "application/json",
+      "X-Action" : "Saved Vehicle",
+      "Access-Control-Allow-Origin" : "http://localhost:4242"
+    }
+  }
+}

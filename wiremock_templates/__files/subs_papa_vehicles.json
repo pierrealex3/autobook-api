@@ -1,0 +1,14 @@
+[
+	{
+		"id": 1,
+		"brand": "Audi",
+		"model": "TT Roadster",
+		"year": "2016"
+	},
+	{
+		"id": 2,
+		"brand": "BMW",
+		"model": "X3 M40i",
+		"year": "2018"
+	}
+]

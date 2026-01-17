@@ -1,0 +1,20 @@
+{
+    "request": {
+        "method": "GET",
+        "url": "/autobook/events",
+		"headers": {
+		    "X-MockUser" : {
+			    "equalTo" : "papa"
+		    }
+	    }
+    },
+    "response": {
+        "status": 200,
+        "bodyFileName": "subs_papa_events.json",
+        "headers": {
+            "Content-Type": "application/json",
+			"X-Action" : "Fetch Events",
+			"Access-Control-Allow-Origin" : "http://localhost:4242"
+        }
+    }
+}

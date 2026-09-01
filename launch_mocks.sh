@@ -1,13 +1,23 @@
 #!/bin/bash
+
+###############################################################################################################
+# tune this setting whether you are running the autobook-api in docker compose (1) or on the local machine (0)
+###############################################################################################################
+export USE_API_IN_DOCKER_COMPOSE=1;
+
 set -x
 
 set -a
 source .env
 set +a
 
-export WINDOWS_GATEWAY_IP=$(cat /etc/resolv.conf | grep -m 1 nameserver | sed -e 's/nameserver[[:space:]]\+//g');
-printf "Windows gateway ip address detected: %s\n" "$WINDOWS_GATEWAY_IP";
-export WIREMOCK_FORWARD_PORT=8181;
+if [ "$USE_API_IN_DOCKER_COMPOSE" -eq 1 ]; then
+  export AUTOBOOK_API_IP='autobook-api'
+else # tested positively on Windows
+  export AUTOBOOK_API_IP=$(cat /etc/resolv.conf | grep -m 1 nameserver | sed -e 's/nameserver[[:space:]]\+//g')
+fi
+
+printf "Autobook api will be referred from wiremock as: %s\n" "$AUTOBOOK_API_IP";
 
 export CUR_WORKDIR=./subst_template_out;
 export MAPPINGS_WORKDIR=$CUR_WORKDIR/mappings;
@@ -18,6 +28,9 @@ export WIREMOCK_TEMPLATE_MAPPINGS_DIR=./wiremock_templates/mappings;
 export WIREMOCK_TEMPLATE_FILES_DIR=./wiremock_templates/__files;
 export WIREMOCK_TARGET_WIREMOCK_TEMPLATE_MAPPINGS_DIR="$WIREMOCK_HOME"/mappings;
 export WIREMOCK_TARGET_WIREMOCK_TEMPLATE_FILES_DIR="$WIREMOCK_HOME"/__files;
+
+mkdir -p "$WIREMOCK_TARGET_WIREMOCK_TEMPLATE_MAPPINGS_DIR"
+mkdir -p "$WIREMOCK_TARGET_WIREMOCK_TEMPLATE_FILES_DIR"
 
 # make the substitutions in the mapping templates
 for file in "$WIREMOCK_TEMPLATE_MAPPINGS_DIR"/subs_*.json; do

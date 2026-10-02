@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class EventDto {
     private Integer eventTargetId;
+    private String eventTargetXid;
     private Integer vehicleId;
     private String vehicleTag;
     private String date;

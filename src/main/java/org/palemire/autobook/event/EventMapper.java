@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface EventMapper {
 
     @Mapping(source = "appointment.appointmentId", target = "eventTargetId")
+    @Mapping(source = "appointment.appointmentXid", target = "eventTargetXid")
     @Mapping(source = "vehicle.id", target = "vehicleId")
     @Mapping(qualifiedByName = "vehicleTag", source = "vehicle", target = "vehicleTag")
     @Mapping(qualifiedByName = "dateTitleTag", source = "appointment", target = "date")

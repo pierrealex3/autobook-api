@@ -15,6 +15,7 @@ import org.palemire.autobook.vehicle.cud.VehicleEntity;
                 targetClass = EventAppointmentDomain.class,
                 columns = {
                         @ColumnResult(name = "appointmentId"),
+                        @ColumnResult(name = "appointmentXid"),
                         @ColumnResult(name = "appointmentDate"),
                         @ColumnResult(name = "appointmentTime"),
                         @ColumnResult(name = "appointmentTitle")

@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPattern": "/autobook/appointments/\\d+",
+    "urlPattern": "/autobook/appointments/.+",
     "headers": {
       "X-MockUser" : {
         "equalTo" : "plemire@nuance.com"

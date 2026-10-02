@@ -9,7 +9,7 @@ import org.palemire.autobook.user.UserVehiclePossessionId;
 import org.palemire.autobook.vehicle.cud.VehicleEntity;
 import org.palemire.autobook.vehicle.cud.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;

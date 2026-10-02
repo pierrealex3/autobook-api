@@ -1,6 +1,11 @@
 server:
   port: 8181
 
+spring:
+  http:
+    converters:
+      preferred-json-mapper: jackson2
+
 logging:
   level:
     org:

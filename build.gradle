@@ -23,7 +23,11 @@ repositories {
 
 dependencyManagement {
 	imports {
+		mavenBom "org.testcontainers:testcontainers-bom:2.0.5"
 		mavenBom "org.springframework.boot:spring-boot-dependencies:3.2.12"
+	}
+	dependencies {
+		dependency 'org.testcontainers:testcontainers:2.0.5'
 	}
 }
 
@@ -46,8 +50,8 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
-	testImplementation 'org.testcontainers:postgresql'
-	testImplementation 'org.testcontainers:junit-jupiter'
+	testImplementation 'org.testcontainers:testcontainers-postgresql'
+	testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
 
 }
 

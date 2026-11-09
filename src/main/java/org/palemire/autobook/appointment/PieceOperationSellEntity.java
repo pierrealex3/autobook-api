@@ -1,0 +1,11 @@
+package org.palemire.autobook.appointment;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Table;
+
+@Entity
+@Table(name = "piece_operation_sell")
+@DiscriminatorValue("SELL")
+public class PieceOperationSellEntity extends PieceOperationEntity {
+}

@@ -11,6 +11,6 @@ import lombok.extern.jackson.Jacksonized;
 @Setter
 public class PieceSummaryDto {
     private Long id;
-    private String title;
+    private String partNumber;
     private String category;
 }

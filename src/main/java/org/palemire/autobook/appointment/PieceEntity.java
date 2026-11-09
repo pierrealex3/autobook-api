@@ -13,9 +13,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 @Table(name = "piece")
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -29,13 +26,22 @@ public abstract class PieceEntity {
     @Setter(value = AccessLevel.NONE)
     private Long id;
 
-    @Column(name = "title")
-    private String title;
+    @Column(name = "part_number", nullable = false)
+    private String partNumber;
 
-    @Column(name = "cost")
-    private BigDecimal cost;
+    @Column(name = "brand")
+    private String brand;
 
-    @Column(name = "manufacturing_date")
-    private LocalDateTime manufacturingDate;
+    @Column(name = "model")
+    private String model;
+
+    @Column(name = "tag")
+    private String tag;
+
+    @Column(name = "km_life")
+    private Integer kmLife;
+
+    @Column(name = "days_life")
+    private Integer daysLife;
 
 }

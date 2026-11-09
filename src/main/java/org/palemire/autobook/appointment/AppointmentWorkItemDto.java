@@ -17,7 +17,7 @@ public class AppointmentWorkItemDto {
 
     private List<AppointmentWorkItemLaborDto> appointmentWorkItemsLabor;
 
-    private List<AppointmentWorkItemPieceDto> appointmentWorkItemsPiece;
+    private List<PieceOperationDto> pieceOperations;
 
 
 }

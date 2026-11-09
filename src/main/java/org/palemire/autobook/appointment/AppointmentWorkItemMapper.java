@@ -5,10 +5,11 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
-import org.mapstruct.NullValueCheckStrategy;
+import org.hibernate.Hibernate;
 import org.palemire.autobook.Response400Exception;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -19,101 +20,85 @@ public abstract class AppointmentWorkItemMapper {
     @Autowired
     protected PieceRepository pieceRepository;
 
-    /**
-     * MAPPINGS: dto to entity
-     */
-
     @Named("appointmentWorkItemMapperDtoToEntity")
     abstract Set<AppointmentWorkItemEntity> fromDtoToEntity(List<AppointmentWorkItemDto> dto);
 
-    @Mapping(target = "appointmentWorkItem", ignore = true)
     abstract AppointmentWorkItemLaborEntity fromDtoToEntity(AppointmentWorkItemLaborDto dto);
 
-    // TODO this method cannot be the best solution possible... can't believe MapStruct cannot generate this kinda stuff.  FIND IT.
-    AppointmentWorkItemPieceEntity fromDtoToEntity(AppointmentWorkItemPieceDto dto) {
-        if (dto instanceof AppointmentWorkItemPieceBuyDto dtox)
-            return fromDtoToEntity(dtox);
-        else if (dto instanceof AppointmentWorkItemPieceInstallDto dtox)
-            return fromDtoToEntity(dtox);
-        else if (dto instanceof AppointmentWorkItemPieceRemovalDto dtox)
-            return fromDtoToEntity(dtox);
-        else if (dto instanceof AppointmentWorkItemPieceRepairDto dtox)
-            return fromDtoToEntity(dtox);
-        else throw new IllegalStateException("Cannot map unmanaged subtype of AppointmentWorkItemPieceDto");
+    PieceOperationEntity fromDtoToEntity(PieceOperationDto dto) {
+        if (dto == null)
+            return null;
+        if (dto.getPerformedAt() == null)
+            throw new Response400Exception("Piece operation performedAt is required");
+
+        PieceOperationEntity entity;
+        if (dto instanceof PieceOperationBuyDto)
+            entity = new PieceOperationBuyEntity();
+        else if (dto instanceof PieceOperationInstallDto)
+            entity = new PieceOperationInstallEntity();
+        else if (dto instanceof PieceOperationRepairDto)
+            entity = new PieceOperationRepairEntity();
+        else if (dto instanceof PieceOperationSellDto)
+            entity = new PieceOperationSellEntity();
+        else if (dto instanceof PieceOperationThrashDto)
+            entity = new PieceOperationThrashEntity();
+        else
+            throw new IllegalStateException("Cannot map unmanaged subtype of PieceOperationDto");
+
+        entity.setCost(Optional.ofNullable(dto.getCost()).orElse(BigDecimal.ZERO));
+        entity.setPerformedAt(dto.getPerformedAt());
+        entity.setPiece(verifyPieceIdExistsIfSpecified(dto.getPiece()));
+
+        return entity;
     }
-
-    @Mapping(target = "piece", source = "piece", qualifiedByName = "verifyPieceIdExistsIfSpecified")
-    @Mapping(target = "appointmentWorkItem", ignore = true)
-    abstract AppointmentWorkItemPieceBuyEntity fromDtoToEntity(AppointmentWorkItemPieceBuyDto dto);
-
-    @Mapping(target = "piece", source = "piece", qualifiedByName = "verifyPieceIdExistsIfSpecified")
-    @Mapping(target = "appointmentWorkItem", ignore = true)
-    abstract AppointmentWorkItemPieceInstallEntity fromDtoToEntity(AppointmentWorkItemPieceInstallDto dto);
-
-    @Mapping(target = "piece", source = "piece", qualifiedByName = "verifyPieceIdExistsIfSpecified")
-    @Mapping(target = "appointmentWorkItem", ignore = true)
-    abstract AppointmentWorkItemPieceRemovalEntity fromDtoToEntity(AppointmentWorkItemPieceRemovalDto dto);
-
-    @Mapping(target = "piece", source = "piece", qualifiedByName = "verifyPieceIdExistsIfSpecified")
-    @Mapping(target = "appointmentWorkItem", ignore = true)
-    abstract AppointmentWorkItemPieceRepairEntity fromDtoToEntity(AppointmentWorkItemPieceRepairDto dto);
 
     @AfterMapping
     void linkBackreferences(@MappingTarget AppointmentWorkItemEntity appointmentWorkItem) {
-        appointmentWorkItem.getAppointmentWorkItemsLabor().forEach(awil -> awil.setAppointmentWorkItem(appointmentWorkItem));
-        appointmentWorkItem.getAppointmentWorkItemsPiece().forEach(awip -> awip.setAppointmentWorkItem(appointmentWorkItem));
+        appointmentWorkItem.getAppointmentWorkItemsLabor()
+                .forEach(labor -> labor.setAppointmentWorkItem(appointmentWorkItem));
     }
 
-    @Named("verifyPieceIdExistsIfSpecified")
     PieceEntity verifyPieceIdExistsIfSpecified(PieceSummaryDto pieceInDto) {
-        Long pieceIdInDto = Optional.ofNullable(pieceInDto).map(PieceSummaryDto::getId).orElse(null);
-
-        if (pieceIdInDto == null)
+        Long pieceId = Optional.ofNullable(pieceInDto).map(PieceSummaryDto::getId).orElse(null);
+        if (pieceId == null)
             return null;
-        if (pieceRepository.existsById(pieceIdInDto))
-            return pieceRepository.getReferenceById(pieceIdInDto);
-        else
-            throw new Response400Exception("Piece ID specified: (%d) does not exist".formatted(pieceIdInDto));
+        if (pieceRepository.existsById(pieceId))
+            return pieceRepository.getReferenceById(pieceId);
+        throw new Response400Exception("Piece ID specified: (%d) does not exist".formatted(pieceId));
     }
-
-    /**
-     * MAPPINGS: entity to dto
-     */
 
     @Named("appointmentWorkItemMapperEntityToDto")
     abstract List<AppointmentWorkItemDto> fromEntityToDto(Set<AppointmentWorkItemEntity> entity);
 
-    AppointmentWorkItemPieceDto fromEntityToDto(AppointmentWorkItemPieceEntity entity) {
-        if (entity instanceof AppointmentWorkItemPieceBuyEntity entityx)
-            return fromEntityToDto(entityx);
-        else if (entity instanceof AppointmentWorkItemPieceInstallEntity entityx)
-            return fromEntityToDto(entityx);
-        else if (entity instanceof AppointmentWorkItemPieceRemovalEntity entityx)
-            return fromEntityToDto(entityx);
-        else if (entity instanceof AppointmentWorkItemPieceRepairEntity entityx)
-            return fromEntityToDto(entityx);
-        else throw new IllegalStateException("Cannot map unmanaged subtype of AppointmentWorkItemPieceEntity");
+    PieceOperationDto fromEntityToDto(PieceOperationEntity entity) {
+        var piece = fromEntityToDto(entity.getPiece());
+        if (entity instanceof PieceOperationBuyEntity)
+            return PieceOperationBuyDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
+        if (entity instanceof PieceOperationInstallEntity)
+            return PieceOperationInstallDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
+        if (entity instanceof PieceOperationRepairEntity)
+            return PieceOperationRepairDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
+        if (entity instanceof PieceOperationSellEntity)
+            return PieceOperationSellDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
+        if (entity instanceof PieceOperationThrashEntity)
+            return PieceOperationThrashDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
+        throw new IllegalStateException("Cannot map unmanaged subtype of PieceOperationEntity");
     }
 
-    abstract AppointmentWorkItemPieceBuyDto fromEntityToDto(AppointmentWorkItemPieceBuyEntity entity);
-
-    abstract AppointmentWorkItemPieceInstallDto fromEntityToDto(AppointmentWorkItemPieceInstallEntity entity);
-
-    abstract AppointmentWorkItemPieceRemovalDto fromEntityToDto(AppointmentWorkItemPieceRemovalEntity entity);
-
-    abstract AppointmentWorkItemPieceRepairDto fromEntityToDto(AppointmentWorkItemPieceRepairEntity entity);
-
-    @Mapping(target = "category", source = "entity", qualifiedByName = "categoryDefinitionForPiece", nullValueCheckStrategy = NullValueCheckStrategy.ALWAYS)
+    @Mapping(target = "category", source = "entity", qualifiedByName = "categoryDefinitionForPiece")
     abstract PieceSummaryDto fromEntityToDto(PieceEntity entity);
 
     @Named("categoryDefinitionForPiece")
     String categoryDefinitionForPiece(PieceEntity piece) {
         if (piece == null)
             return null;
-        if (piece instanceof PieceTireEntity)
+        var pieceType = Hibernate.getClass(piece);
+        if (pieceType == PieceTireEntity.class)
             return "TIRE";
+        if (pieceType == PieceWiperEntity.class)
+            return "WIPER";
+        if (pieceType == PieceBrakeEntity.class)
+            return "BRAKE";
         throw new IllegalStateException("Cannot map unmanaged subtype of PieceEntity");
     }
-
-
 }

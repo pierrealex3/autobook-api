@@ -5,9 +5,9 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import lombok.extern.jackson.Jacksonized;
 
-@SuperBuilder
-@Jacksonized
 @Getter
 @Setter
-public class AppointmentWorkItemPieceRemovalDto extends AppointmentWorkItemPieceDto {
+@SuperBuilder
+@Jacksonized
+public class PieceOperationRepairDto extends PieceOperationDto {
 }

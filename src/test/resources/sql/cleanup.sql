@@ -1,5 +1,14 @@
 BEGIN;
-DELETE FROM appointment_work_item_piece;
+DELETE FROM vehicle_piece_operation_asso;
+DELETE FROM appointment_work_item_piece_operation_asso;
+DELETE FROM piece_operation_buy;
+DELETE FROM piece_operation_install;
+DELETE FROM piece_operation_repair;
+DELETE FROM piece_operation_sell;
+DELETE FROM piece_operation_thrash;
+DELETE FROM piece_operation;
+DELETE FROM piece_tire;
+DELETE FROM piece;
 DELETE FROM appointment_work_item_labor;
 DELETE FROM appointment_work_item;
 DELETE FROM appointment_note;

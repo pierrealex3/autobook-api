@@ -10,8 +10,8 @@ import org.palemire.autobook.appointment.AppointmentNoteDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemLaborDto;
 import org.palemire.autobook.appointment.AppointmentWorkItemLaborEntity;
-import org.palemire.autobook.appointment.AppointmentWorkItemPieceBuyDto;
-import org.palemire.autobook.appointment.AppointmentWorkItemPieceEntity;
+import org.palemire.autobook.appointment.PieceOperationBuyDto;
+import org.palemire.autobook.appointment.PieceOperationEntity;
 import org.palemire.autobook.appointment.PieceSummaryDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -29,10 +29,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
 import java.util.List;
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -93,14 +93,13 @@ class VehicleControllerTest {
         var appointmentWorkItem1Labor2HoursWorked = new BigDecimal("0.75");
         var appointmentWorkItem1Labor2Cost = new BigDecimal("30.11");
 
-        var appointmentWorkItem1Piece1Title = "Oil pints";
         var appointmentWorkItem1Piece1Cost = new BigDecimal("11.11");
 
-        String appointmentWorkItem1Piece2Title = "Stronger Oil filter ";
         var appointmentWorkItem1Piece2Cost = new BigDecimal("110.11");
+        var operationPerformedAt = LocalDateTime.of(2025, Month.DECEMBER, 17, 9, 0);
 
         Long appointmentWorkItem1Piece2PieceId = 1L;
-        var appointmentWorkItem1Piece2PieceTitle = "Winter tires";
+        var appointmentWorkItem1Piece2PartNumber = "WINTER-205-55";
         var appointmentWorkItem1Piece2PieceCategory = "TIRE";
 
         var dtoForCreate = AppointmentDto.builder()
@@ -126,19 +125,18 @@ class VehicleControllerTest {
                                                                 .build()
                                                 )
                                         )
-                                        .appointmentWorkItemsPiece(
+                                        .pieceOperations(
                                                 List.of(
-                                                        AppointmentWorkItemPieceBuyDto.builder()
-                                                                .title(appointmentWorkItem1Piece1Title)
+                                                        PieceOperationBuyDto.builder()
                                                                 .cost(appointmentWorkItem1Piece1Cost)
-                                                                // piece is null
+                                                                .performedAt(operationPerformedAt)
                                                                 .build(),
-                                                        AppointmentWorkItemPieceBuyDto.builder()
-                                                                .title(appointmentWorkItem1Piece2Title)
+                                                        PieceOperationBuyDto.builder()
                                                                 .cost(appointmentWorkItem1Piece2Cost)
+                                                                .performedAt(operationPerformedAt)
                                                                 .piece(PieceSummaryDto.builder()
                                                                         .id(appointmentWorkItem1Piece2PieceId)
-                                                                        .title(appointmentWorkItem1Piece2PieceTitle)
+                                                                        .partNumber(appointmentWorkItem1Piece2PartNumber)
                                                                         .category(appointmentWorkItem1Piece2PieceCategory)
                                                                         .build()
                                                                 )
@@ -193,17 +191,15 @@ class VehicleControllerTest {
                                 appointmentWorkItem1Labor2Cost.compareTo(awile.getCost()) == 0
         );
 
-        List<AppointmentWorkItemPieceEntity> appointmentWorkItemPieceEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awie -> awie.getAppointmentWorkItemsPiece().stream()).toList();
+        List<PieceOperationEntity> pieceOperationEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awi -> awi.getPieceOperations().stream()).toList();
 
-        assertThat(appointmentWorkItemPieceEntities)
+        assertThat(pieceOperationEntities)
                 .hasSize(2)
-                .allMatch(awipe ->
-                        appointmentWorkItem1Piece1Title.equals(awipe.getTitle()) &&
-                                Objects.isNull(awipe.getPiece())
-                ||
-                                appointmentWorkItem1Piece2Title.equals(awipe.getTitle()) &&
-                                        appointmentWorkItem1Piece2PieceId.equals(awipe.getPiece().getId())
-        );
+                .allMatch(operation ->
+                        operationPerformedAt.equals(operation.getPerformedAt())
+                                && (operation.getPiece() == null
+                                || appointmentWorkItem1Piece2PieceId.equals(operation.getPiece().getId()))
+                );
 
 
         /**
@@ -249,20 +245,19 @@ class VehicleControllerTest {
                                                                 .build()
                                                 )
                                         )
-                                        .appointmentWorkItemsPiece(
+                                        .pieceOperations(
                                                 List.of(
-                                                        AppointmentWorkItemPieceBuyDto.builder()
-                                                                .title(appointmentWorkItem1Piece1Title)
+                                                        PieceOperationBuyDto.builder()
                                                                 .cost(appointmentWorkItem1Piece1Cost)
-                                                                // piece is null
+                                                                .performedAt(operationPerformedAt)
                                                                 .build(),
-                                                        AppointmentWorkItemPieceBuyDto.builder()
-                                                                .title(appointmentWorkItem1Piece2Title)
+                                                        PieceOperationBuyDto.builder()
                                                                 .cost(appointmentWorkItem1Piece2Cost)
+                                                                .performedAt(operationPerformedAt)
                                                                 .piece(
                                                                         PieceSummaryDto.builder()
                                                                                 .id(appointmentWorkItem1Piece2PieceId)
-                                                                                .title(appointmentWorkItem1Piece2PieceTitle)
+                                                                                .partNumber(appointmentWorkItem1Piece2PartNumber)
                                                                                 .category(appointmentWorkItem1Piece2PieceCategory)
                                                                                 .build()
                                                                 )
@@ -291,7 +286,7 @@ class VehicleControllerTest {
         appointmentEntityList = fetchWholeAppointmentEntityModel();
 
         assertThat(appointmentEntityList).hasSize(1);
-        appointmentEntity = appointmentEntityList.get(0);
+        appointmentEntity = appointmentEntityList.getFirst();
         assertThat(appointmentEntity.getTitle()).isEqualTo(appointmentTitle);
         assertThat(appointmentEntity.getNote()).isEqualTo(appointmentNote);
         assertThat(appointmentEntity.getDate()).isEqualTo(appointmentDateU); // Updated
@@ -317,16 +312,14 @@ class VehicleControllerTest {
                                         appointmentWorkItem1Labor3CostU.compareTo(awile.getCost()) == 0
                 );
 
-        appointmentWorkItemPieceEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awie -> awie.getAppointmentWorkItemsPiece().stream()).toList();
+        pieceOperationEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awi -> awi.getPieceOperations().stream()).toList();
 
-        assertThat(appointmentWorkItemPieceEntities)
+        assertThat(pieceOperationEntities)
                 .hasSize(2)
-                .allMatch(awipe ->
-                        appointmentWorkItem1Piece1Title.equals(awipe.getTitle()) &&
-                                Objects.isNull(awipe.getPiece())
-                                ||
-                                appointmentWorkItem1Piece2Title.equals(awipe.getTitle()) &&
-                                        appointmentWorkItem1Piece2PieceId.equals(awipe.getPiece().getId())
+                .allMatch(operation ->
+                        operationPerformedAt.equals(operation.getPerformedAt())
+                                && (operation.getPiece() == null
+                                || appointmentWorkItem1Piece2PieceId.equals(operation.getPiece().getId()))
                 );
 
         /**
@@ -366,19 +359,19 @@ class VehicleControllerTest {
                               "cost": 30.11
                             }
                           ],
-                          "appointmentWorkItemsPiece": [
+                          "pieceOperations": [
                             {
-                              "title": "Oil pints",
-                              "category": "buy",
+                              "type": "buy",
+                              "performedAt": "2025-12-17T09:00:00",
                               "piece": null,
                               "cost": 11.11
                             },
                             {
-                              "title": "Stronger Oil filter ",
-                              "category": "buy",
+                              "type": "buy",
+                              "performedAt": "2025-12-17T09:00:00",
                               "piece": {
                                 "id": 1,
-                                "title": "Winter tires",
+                                "partNumber": "WINTER-205-55",
                                 "category": "TIRE"
                               },
                               "cost": 110.11
@@ -409,7 +402,7 @@ class VehicleControllerTest {
         LEFT JOIN FETCH ae.appointmentNotes an
         LEFT JOIN FETCH ae.appointmentWorkItems awi
         LEFT JOIN FETCH awi.appointmentWorkItemsLabor awil
-        LEFT JOIN FETCH awi.appointmentWorkItemsPiece awip
+        LEFT JOIN FETCH awi.pieceOperations po
         """, AppointmentEntity.class).getResultList();
     }
 

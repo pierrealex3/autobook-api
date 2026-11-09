@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -44,10 +46,14 @@ public class AppointmentWorkItemEntity {
     @Setter(AccessLevel.NONE)
     private Set<AppointmentWorkItemLaborEntity> appointmentWorkItemsLabor = new HashSet<>();
 
-    @OneToMany(mappedBy = "appointmentWorkItem", orphanRemoval = true)
-    @Cascade(CascadeType.ALL)
+    @ManyToMany(cascade = {jakarta.persistence.CascadeType.PERSIST, jakarta.persistence.CascadeType.MERGE})
+    @JoinTable(
+            name = "appointment_work_item_piece_operation_asso",
+            joinColumns = @JoinColumn(name = "appointment_work_item_id"),
+            inverseJoinColumns = @JoinColumn(name = "piece_operation_id")
+    )
     @Setter(AccessLevel.NONE)
-    private Set<AppointmentWorkItemPieceEntity> appointmentWorkItemsPiece = new HashSet<>();
+    private Set<PieceOperationEntity> pieceOperations = new HashSet<>();
 
     @Override
     public final boolean equals(Object o) {

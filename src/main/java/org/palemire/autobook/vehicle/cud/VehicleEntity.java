@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import org.palemire.autobook.appointment.AppointmentEntity;
+import org.palemire.autobook.appointment.VehiclePieceOperationAssociationEntity;
 import org.palemire.autobook.user.UserEntity;
 
 import java.util.ArrayList;
@@ -49,5 +50,9 @@ public class VehicleEntity {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @Setter(AccessLevel.NONE)
     private List<AppointmentEntity> appointments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "vehicle")
+    @Setter(AccessLevel.NONE)
+    private Set<VehiclePieceOperationAssociationEntity> pieceOperationAssociations = new HashSet<>();
 
 }

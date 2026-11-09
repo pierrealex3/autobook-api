@@ -11,51 +11,41 @@ import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Objects;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
-@Table(name = "appointment_work_item_piece")
+@Table(name = "piece_operation")
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "category")
 @Getter
 @Setter
-public abstract class AppointmentWorkItemPieceEntity {
+public abstract class PieceOperationEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(value = AccessLevel.NONE)
-    private Long id;
+    @Setter(AccessLevel.NONE)
+    private Integer id;
 
-    @Column(name = "title")
-    private String title;
+    @Column(name = "cost", nullable = false)
+    private BigDecimal cost;
+
+    @Column(name = "performed_at", nullable = false)
+    private LocalDateTime performedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "appointment_work_item_id")
-    private AppointmentWorkItemEntity appointmentWorkItem;
-
-    @OneToOne
     @JoinColumn(name = "piece_id")
     private PieceEntity piece;
 
-    @Override
-    public final boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AppointmentWorkItemPieceEntity other)) return false;
-
-        // actual check
-        return id != null && id.equals(other.id);
-    }
-
-    @Override
-    public final int hashCode() {
-        return Objects.hash(id);
-    }
-
+    @OneToMany(mappedBy = "pieceOperation")
+    private Set<VehiclePieceOperationAssociationEntity> vehicleAssociations = new HashSet<>();
 
 }

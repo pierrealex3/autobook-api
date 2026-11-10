@@ -2,12 +2,12 @@ package org.palemire.autobook;
 
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
-import org.palemire.autobook.user.UserEntity;
-import org.palemire.autobook.user.UserRepository;
-import org.palemire.autobook.user.UserVehicleAssociationEntity;
-import org.palemire.autobook.user.UserVehiclePossessionId;
-import org.palemire.autobook.vehicle.cud.VehicleEntity;
-import org.palemire.autobook.vehicle.cud.VehicleRepository;
+import org.palemire.autobook.entity.UserEntity;
+import org.palemire.autobook.entity.UserVehicleAssociationEntity;
+import org.palemire.autobook.entity.UserVehiclePossessionId;
+import org.palemire.autobook.entity.VehicleEntity;
+import org.palemire.autobook.repository.UserRepository;
+import org.palemire.autobook.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;

@@ -102,56 +102,48 @@ class VehicleControllerTest {
         var appointmentWorkItem1Piece2PartNumber = "WINTER-205-55";
         var appointmentWorkItem1Piece2PieceCategory = "TIRE";
 
-        var dtoForCreate = AppointmentDto.builder()
+        var dtoForCreate = new AppointmentDto()
                 .title(appointmentTitle)
                 .note(appointmentNote)
                 .date(appointmentDate)
-                .time(appointmentTime)
+                .time("09:00:00")
                 .appointmentWorkItems(
                         List.of(
-                                AppointmentWorkItemDto.builder()
+                                new AppointmentWorkItemDto()
                                         .title(appointmentWorkItem1Title)
                                         .appointmentWorkItemsLabor(
                                                 List.of(
-                                                        AppointmentWorkItemLaborDto.builder()
+                                                        new AppointmentWorkItemLaborDto()
                                                                 .title(appointmentWorkItem1Labor1Title)
                                                                 .hoursWorked(appointmentWorkItem1Labor1HoursWorked)
-                                                                .cost(appointmentWorkItem1Labor1Cost)
-                                                                .build(),
-                                                        AppointmentWorkItemLaborDto.builder()
+                                                                .cost(appointmentWorkItem1Labor1Cost),
+                                                        new AppointmentWorkItemLaborDto()
                                                                 .title(appointmentWorkItem1Labor2Title)
                                                                 .hoursWorked(appointmentWorkItem1Labor2HoursWorked)
                                                                 .cost(appointmentWorkItem1Labor2Cost)
-                                                                .build()
                                                 )
                                         )
                                         .pieceOperations(
                                                 List.of(
-                                                        PieceOperationBuyDto.builder()
-                                                                .cost(appointmentWorkItem1Piece1Cost)
-                                                                .performedAt(operationPerformedAt)
-                                                                .build(),
-                                                        PieceOperationBuyDto.builder()
+                                                        new PieceOperationBuyDto("buy", operationPerformedAt)
+                                                                .cost(appointmentWorkItem1Piece1Cost),
+                                                        new PieceOperationBuyDto("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece2Cost)
-                                                                .performedAt(operationPerformedAt)
-                                                                .piece(PieceSummaryDto.builder()
+                                                                .piece(new PieceSummaryDto()
                                                                         .id(appointmentWorkItem1Piece2PieceId)
                                                                         .partNumber(appointmentWorkItem1Piece2PartNumber)
                                                                         .category(appointmentWorkItem1Piece2PieceCategory)
-                                                                        .build()
                                                                 )
-                                                                .build()
                                                 )
                                         )
-                                        .build()
                         )
                 )
                 .appointmentNotes(
                         List.of(
-                                AppointmentNoteDto.builder().note(appointmentNote1).build(),
-                                AppointmentNoteDto.builder().note(appointmentNote2).build()
+                                new AppointmentNoteDto().note(appointmentNote1),
+                                new AppointmentNoteDto().note(appointmentNote2)
                         )
-                ).build();
+                );
 
         MvcResult creationResult = mockMvc.perform(
                 post(Constants.AUTOBOOK_API_ROOT + "/vehicles/1/appointment")
@@ -217,62 +209,53 @@ class VehicleControllerTest {
         var appointmentWorkItem1Labor3HoursWorkedU = new BigDecimal("0.48");
         var appointmentWorkItem1Labor3CostU = new BigDecimal("30.11");
 
-        var dtoForUpdate = AppointmentDto.builder()
+        var dtoForUpdate = new AppointmentDto()
                 .title(appointmentTitle)
                 .note(appointmentNote)
                 .date(appointmentDateU)  // Updated
-                .time(appointmentTime)
+                .time("09:00:00")
                 .appointmentWorkItems(
                         List.of(
-                                AppointmentWorkItemDto.builder()
+                                new AppointmentWorkItemDto()
                                         .title(appointmentWorkItem1Title)
                                         .appointmentWorkItemsLabor(
                                                 List.of(
-                                                        AppointmentWorkItemLaborDto.builder()
+                                                        new AppointmentWorkItemLaborDto()
                                                                 .title(appointmentWorkItem1Labor1Title)
                                                                 .hoursWorked(appointmentWorkItem1Labor1HoursWorked)
-                                                                .cost(appointmentWorkItem1Labor1Cost)
-                                                                .build(),
-                                                        AppointmentWorkItemLaborDto.builder() // Updated
+                                                                .cost(appointmentWorkItem1Labor1Cost),
+                                                        new AppointmentWorkItemLaborDto() // Updated
                                                                 .title(appointmentWorkItem1Labor2TitleU)
                                                                 .hoursWorked(appointmentWorkItem1Labor2HoursWorkedU)
-                                                                .cost(appointmentWorkItem1Labor2CostU)
-                                                                .build(),
-                                                        AppointmentWorkItemLaborDto.builder() // Added
+                                                                .cost(appointmentWorkItem1Labor2CostU),
+                                                        new AppointmentWorkItemLaborDto() // Added
                                                                 .title(appointmentWorkItem1Labor3TitleU)
                                                                 .hoursWorked(appointmentWorkItem1Labor3HoursWorkedU)
                                                                 .cost(appointmentWorkItem1Labor3CostU)
-                                                                .build()
                                                 )
                                         )
                                         .pieceOperations(
                                                 List.of(
-                                                        PieceOperationBuyDto.builder()
-                                                                .cost(appointmentWorkItem1Piece1Cost)
-                                                                .performedAt(operationPerformedAt)
-                                                                .build(),
-                                                        PieceOperationBuyDto.builder()
+                                                        new PieceOperationBuyDto("buy", operationPerformedAt)
+                                                                .cost(appointmentWorkItem1Piece1Cost),
+                                                        new PieceOperationBuyDto("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece2Cost)
-                                                                .performedAt(operationPerformedAt)
                                                                 .piece(
-                                                                        PieceSummaryDto.builder()
+                                                                        new PieceSummaryDto()
                                                                                 .id(appointmentWorkItem1Piece2PieceId)
                                                                                 .partNumber(appointmentWorkItem1Piece2PartNumber)
                                                                                 .category(appointmentWorkItem1Piece2PieceCategory)
-                                                                                .build()
                                                                 )
-                                                                .build()
                                                 )
                                         )
-                                        .build()
                         )
                 )
                 .appointmentNotes(
                         List.of(
-                                AppointmentNoteDto.builder().note(appointmentNote1).build(),
-                                AppointmentNoteDto.builder().note(appointmentNote2).build()
+                                new AppointmentNoteDto().note(appointmentNote1),
+                                new AppointmentNoteDto().note(appointmentNote2)
                         )
-                ).build();
+                );
 
         mockMvc.perform(
                         put(Constants.AUTOBOOK_API_ROOT + "/appointments/" + xid)

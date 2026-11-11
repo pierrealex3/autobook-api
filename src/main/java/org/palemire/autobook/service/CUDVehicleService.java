@@ -38,7 +38,10 @@ public class CUDVehicleService {
     void mapEntity(CUDVehicleDto vehicleDto, VehicleEntity vehicleEntity) {
         vehicleEntity.setBrand(vehicleDto.getBrand());
         vehicleEntity.setModel(vehicleDto.getModel());
-        vehicleEntity.setYear(vehicleDto.getYear());
+        Integer year = vehicleDto.getYear();
+        if (year != null && (year < Short.MIN_VALUE || year > Short.MAX_VALUE))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Vehicle year is outside the SMALLINT range");
+        vehicleEntity.setYear(year == null ? null : year.shortValue());
         vehicleEntity.setTag(vehicleDto.getTag());
     }
 }

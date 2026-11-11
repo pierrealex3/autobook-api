@@ -16,6 +16,7 @@ public class FetchEventsDao {
     private final EntityManager entityManager;
 
     @Transactional
+    @SuppressWarnings("unchecked")
     public List<Object[]> fetchAllEvents(String userId) {
 
         var query = entityManager.createNativeQuery(

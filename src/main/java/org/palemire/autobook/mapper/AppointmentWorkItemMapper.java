@@ -94,16 +94,22 @@ public abstract class AppointmentWorkItemMapper {
 
     PieceOperationDto fromEntityToDto(PieceOperationEntity entity) {
         var piece = fromEntityToDto(entity.getPiece());
-        if (entity instanceof PieceOperationBuyEntity)
-            return PieceOperationBuyDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
-        if (entity instanceof PieceOperationInstallEntity)
-            return PieceOperationInstallDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
-        if (entity instanceof PieceOperationRepairEntity)
-            return PieceOperationRepairDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
-        if (entity instanceof PieceOperationSellEntity)
-            return PieceOperationSellDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
-        if (entity instanceof PieceOperationThrashEntity)
-            return PieceOperationThrashDto.builder().cost(entity.getCost()).performedAt(entity.getPerformedAt()).piece(piece).build();
+        var entityClass = Hibernate.getClass(entity);
+        if (entityClass == PieceOperationBuyEntity.class)
+            return new PieceOperationBuyDto("buy", entity.getPerformedAt())
+                    .cost(entity.getCost()).piece(piece);
+        if (entityClass == PieceOperationInstallEntity.class)
+            return new PieceOperationInstallDto("install", entity.getPerformedAt())
+                    .cost(entity.getCost()).piece(piece);
+        if (entityClass == PieceOperationRepairEntity.class)
+            return new PieceOperationRepairDto("repair", entity.getPerformedAt())
+                    .cost(entity.getCost()).piece(piece);
+        if (entityClass == PieceOperationSellEntity.class)
+            return new PieceOperationSellDto("sell", entity.getPerformedAt())
+                    .cost(entity.getCost()).piece(piece);
+        if (entityClass == PieceOperationThrashEntity.class)
+            return new PieceOperationThrashDto("thrash", entity.getPerformedAt())
+                    .cost(entity.getCost()).piece(piece);
         throw new IllegalStateException("Cannot map unmanaged subtype of PieceOperationEntity");
     }
 

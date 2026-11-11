@@ -1,0 +1,256 @@
+openapi: 3.0.3
+info:
+  title: Autobook API
+  version: 1.0.0
+servers:
+  - url: /autobook
+tags:
+  - name: Vehicle
+paths:
+  /vehicles:
+    get:
+      operationId: getAllVehicles
+      tags: [Vehicle]
+      parameters:
+        - name: X-MockUser
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Vehicles accessible to the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehicleDto'
+  /vehicles/{vehicleId}/appointment:
+    post:
+      operationId: createAppointment
+      tags: [Vehicle]
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentDto'
+      responses:
+        '201':
+          description: Appointment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentCreatedDto'
+  /appointments/{appointmentId}:
+    get:
+      operationId: getAppointment
+      tags: [Vehicle]
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Appointment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AppointmentDto'
+    put:
+      operationId: modifyAppointment
+      tags: [Vehicle]
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppointmentDto'
+      responses:
+        '204':
+          description: Appointment updated
+  /events:
+    get:
+      operationId: getAllEvents
+      tags: [Vehicle]
+      parameters:
+        - name: X-MockUser
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Events accessible to the user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventDto'
+components:
+  schemas:
+    AppointmentCreatedDto:
+      type: object
+      properties:
+        xid:
+          type: string
+    AppointmentDto:
+      type: object
+      properties:
+        title:
+          type: string
+        note:
+          type: string
+        date:
+          type: string
+          format: date
+        time:
+          type: string
+          format: time
+        appointmentWorkItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppointmentWorkItemDto'
+        appointmentNotes:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppointmentNoteDto'
+    AppointmentNoteDto:
+      type: object
+      properties:
+        note:
+          type: string
+    AppointmentWorkItemDto:
+      type: object
+      properties:
+        title:
+          type: string
+        appointmentWorkItemsLabor:
+          type: array
+          items:
+            $ref: '#/components/schemas/AppointmentWorkItemLaborDto'
+        pieceOperations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PieceOperationDto'
+    AppointmentWorkItemLaborDto:
+      type: object
+      properties:
+        title:
+          type: string
+        hoursWorked:
+          type: number
+        cost:
+          type: number
+    PieceOperationDto:
+      type: object
+      required: [type, performedAt]
+      discriminator:
+        propertyName: type
+        mapping:
+          buy: '#/components/schemas/PieceOperationBuyDto'
+          install: '#/components/schemas/PieceOperationInstallDto'
+          repair: '#/components/schemas/PieceOperationRepairDto'
+          sell: '#/components/schemas/PieceOperationSellDto'
+          thrash: '#/components/schemas/PieceOperationThrashDto'
+      properties:
+        type:
+          type: string
+        cost:
+          type: number
+        performedAt:
+          type: string
+          format: date-time
+        piece:
+          $ref: '#/components/schemas/PieceSummaryDto'
+    PieceOperationBuyDto:
+      allOf:
+        - $ref: '#/components/schemas/PieceOperationDto'
+    PieceOperationInstallDto:
+      allOf:
+        - $ref: '#/components/schemas/PieceOperationDto'
+    PieceOperationRepairDto:
+      allOf:
+        - $ref: '#/components/schemas/PieceOperationDto'
+    PieceOperationSellDto:
+      allOf:
+        - $ref: '#/components/schemas/PieceOperationDto'
+    PieceOperationThrashDto:
+      allOf:
+        - $ref: '#/components/schemas/PieceOperationDto'
+    PieceSummaryDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        partNumber:
+          type: string
+        category:
+          type: string
+    VehicleDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        brand:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+          format: int32
+        tag:
+          type: string
+    CUDVehicleDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        brand:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+          format: int32
+        tag:
+          type: string
+    EventDto:
+      type: object
+      properties:
+        eventTargetId:
+          type: integer
+          format: int32
+        eventTargetXid:
+          type: string
+        vehicleId:
+          type: integer
+          format: int32
+        vehicleTag:
+          type: string
+        date:
+          type: string
+        title:
+          type: string
+        eventType:
+          type: string

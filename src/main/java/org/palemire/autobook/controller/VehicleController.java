@@ -3,7 +3,8 @@ package org.palemire.autobook.controller;
 import lombok.RequiredArgsConstructor;
 import org.palemire.autobook.api.VehicleApi;
 import org.palemire.autobook.dto.AppointmentCreatedDto;
-import org.palemire.autobook.dto.AppointmentDto;
+import org.palemire.autobook.dto.AppointmentDtoReq;
+import org.palemire.autobook.dto.AppointmentDtoRes;
 import org.palemire.autobook.dto.EventDto;
 import org.palemire.autobook.dto.VehicleDto;
 import org.palemire.autobook.mapper.AppointmentMapper;
@@ -29,20 +30,20 @@ public class VehicleController implements VehicleApi {
         return ResponseEntity.ok(fetchVehicleService.getAllVehicles(xMockUser));
     }
 
-    public ResponseEntity<AppointmentCreatedDto> createAppointment(Integer vehicleId, AppointmentDto appointmentDto) {
+    public ResponseEntity<AppointmentCreatedDto> createAppointment(Integer vehicleId, AppointmentDtoReq appointmentDto) {
         var appointmentEntity = appointmentMapper.fromDtoToEntity(appointmentDto);
         appointmentService.createAppointment(vehicleId, appointmentEntity);
         var appointmentCreatedDto = new AppointmentCreatedDto().xid(appointmentEntity.getXid());
         return ResponseEntity.status(HttpStatus.CREATED).body(appointmentCreatedDto);
     }
 
-    public ResponseEntity<AppointmentDto> getAppointment(String appointmentId) {
+    public ResponseEntity<AppointmentDtoRes> getAppointment(String appointmentId) {
         var appointmentEntity = appointmentService.getAppointment(appointmentId);
         var appointmentDto = appointmentMapper.fromEntityToDto(appointmentEntity);
         return ResponseEntity.ok(appointmentDto);
     }
 
-    public ResponseEntity<Void> modifyAppointment(String appointmentId, AppointmentDto appointmentDto) {
+    public ResponseEntity<Void> modifyAppointment(String appointmentId, AppointmentDtoReq appointmentDto) {
         var detachedEntity = appointmentMapper.fromDtoToEntity(appointmentDto);
         appointmentService.modifyAppointment(appointmentId, detachedEntity);
         return ResponseEntity.noContent().build();

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
-import org.palemire.autobook.dto.AppointmentDto;
+import org.palemire.autobook.dto.AppointmentDtoReq;
 import org.palemire.autobook.dto.AppointmentNoteDto;
-import org.palemire.autobook.dto.AppointmentWorkItemDto;
+import org.palemire.autobook.dto.AppointmentWorkItemDtoReq;
 import org.palemire.autobook.dto.AppointmentWorkItemLaborDto;
-import org.palemire.autobook.dto.PieceOperationBuyDto;
+import org.palemire.autobook.dto.PieceOperationBuyDtoReq;
 import org.palemire.autobook.dto.PieceSummaryDto;
 import org.palemire.autobook.entity.AppointmentEntity;
 import org.palemire.autobook.entity.AppointmentWorkItemLaborEntity;
@@ -102,14 +102,14 @@ class VehicleControllerTest {
         var appointmentWorkItem1Piece2PartNumber = "WINTER-205-55";
         var appointmentWorkItem1Piece2PieceCategory = "TIRE";
 
-        var dtoForCreate = new AppointmentDto()
+        var dtoForCreate = new AppointmentDtoReq()
                 .title(appointmentTitle)
                 .note(appointmentNote)
                 .date(appointmentDate)
                 .time("09:00:00")
                 .appointmentWorkItems(
                         List.of(
-                                new AppointmentWorkItemDto()
+                                new AppointmentWorkItemDtoReq()
                                         .title(appointmentWorkItem1Title)
                                         .appointmentWorkItemsLabor(
                                                 List.of(
@@ -125,9 +125,9 @@ class VehicleControllerTest {
                                         )
                                         .pieceOperations(
                                                 List.of(
-                                                        new PieceOperationBuyDto("buy", operationPerformedAt)
+                                                        new PieceOperationBuyDtoReq("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece1Cost),
-                                                        new PieceOperationBuyDto("buy", operationPerformedAt)
+                                                        new PieceOperationBuyDtoReq("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece2Cost)
                                                                 .piece(new PieceSummaryDto()
                                                                         .id(appointmentWorkItem1Piece2PieceId)
@@ -209,14 +209,14 @@ class VehicleControllerTest {
         var appointmentWorkItem1Labor3HoursWorkedU = new BigDecimal("0.48");
         var appointmentWorkItem1Labor3CostU = new BigDecimal("30.11");
 
-        var dtoForUpdate = new AppointmentDto()
+        var dtoForUpdate = new AppointmentDtoReq()
                 .title(appointmentTitle)
                 .note(appointmentNote)
                 .date(appointmentDateU)  // Updated
                 .time("09:00:00")
                 .appointmentWorkItems(
                         List.of(
-                                new AppointmentWorkItemDto()
+                                new AppointmentWorkItemDtoReq()
                                         .title(appointmentWorkItem1Title)
                                         .appointmentWorkItemsLabor(
                                                 List.of(
@@ -236,9 +236,9 @@ class VehicleControllerTest {
                                         )
                                         .pieceOperations(
                                                 List.of(
-                                                        new PieceOperationBuyDto("buy", operationPerformedAt)
+                                                        new PieceOperationBuyDtoReq("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece1Cost),
-                                                        new PieceOperationBuyDto("buy", operationPerformedAt)
+                                                        new PieceOperationBuyDtoReq("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece2Cost)
                                                                 .piece(
                                                                         new PieceSummaryDto()

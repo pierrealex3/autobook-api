@@ -7,14 +7,21 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 import org.hibernate.Hibernate;
 import org.palemire.autobook.Response400Exception;
-import org.palemire.autobook.dto.AppointmentWorkItemDto;
+import org.palemire.autobook.dto.AppointmentWorkItemDtoReq;
+import org.palemire.autobook.dto.AppointmentWorkItemDtoRes;
 import org.palemire.autobook.dto.AppointmentWorkItemLaborDto;
-import org.palemire.autobook.dto.PieceOperationBuyDto;
-import org.palemire.autobook.dto.PieceOperationDto;
-import org.palemire.autobook.dto.PieceOperationInstallDto;
-import org.palemire.autobook.dto.PieceOperationRepairDto;
-import org.palemire.autobook.dto.PieceOperationSellDto;
-import org.palemire.autobook.dto.PieceOperationThrashDto;
+import org.palemire.autobook.dto.PieceOperationBuyDtoReq;
+import org.palemire.autobook.dto.PieceOperationBuyDtoRes;
+import org.palemire.autobook.dto.PieceOperationDtoReq;
+import org.palemire.autobook.dto.PieceOperationDtoRes;
+import org.palemire.autobook.dto.PieceOperationInstallDtoReq;
+import org.palemire.autobook.dto.PieceOperationInstallDtoRes;
+import org.palemire.autobook.dto.PieceOperationRepairDtoReq;
+import org.palemire.autobook.dto.PieceOperationRepairDtoRes;
+import org.palemire.autobook.dto.PieceOperationSellDtoReq;
+import org.palemire.autobook.dto.PieceOperationSellDtoRes;
+import org.palemire.autobook.dto.PieceOperationThrashDtoReq;
+import org.palemire.autobook.dto.PieceOperationThrashDtoRes;
 import org.palemire.autobook.dto.PieceSummaryDto;
 import org.palemire.autobook.entity.AppointmentWorkItemEntity;
 import org.palemire.autobook.entity.AppointmentWorkItemLaborEntity;
@@ -43,29 +50,29 @@ public abstract class AppointmentWorkItemMapper {
     protected PieceRepository pieceRepository;
 
     @Named("appointmentWorkItemMapperDtoToEntity")
-    abstract Set<AppointmentWorkItemEntity> fromDtoToEntity(List<AppointmentWorkItemDto> dto);
+    abstract Set<AppointmentWorkItemEntity> fromDtoToEntity(List<AppointmentWorkItemDtoReq> dto);
 
     abstract AppointmentWorkItemLaborEntity fromDtoToEntity(AppointmentWorkItemLaborDto dto);
 
-    PieceOperationEntity fromDtoToEntity(PieceOperationDto dto) {
+    PieceOperationEntity fromDtoToEntity(PieceOperationDtoReq dto) {
         if (dto == null)
             return null;
         if (dto.getPerformedAt() == null)
             throw new Response400Exception("Piece operation performedAt is required");
 
         PieceOperationEntity entity;
-        if (dto instanceof PieceOperationBuyDto)
+        if (dto instanceof PieceOperationBuyDtoReq)
             entity = new PieceOperationBuyEntity();
-        else if (dto instanceof PieceOperationInstallDto)
+        else if (dto instanceof PieceOperationInstallDtoReq)
             entity = new PieceOperationInstallEntity();
-        else if (dto instanceof PieceOperationRepairDto)
+        else if (dto instanceof PieceOperationRepairDtoReq)
             entity = new PieceOperationRepairEntity();
-        else if (dto instanceof PieceOperationSellDto)
+        else if (dto instanceof PieceOperationSellDtoReq)
             entity = new PieceOperationSellEntity();
-        else if (dto instanceof PieceOperationThrashDto)
+        else if (dto instanceof PieceOperationThrashDtoReq)
             entity = new PieceOperationThrashEntity();
         else
-            throw new IllegalStateException("Cannot map unmanaged subtype of PieceOperationDto");
+            throw new IllegalStateException("Cannot map unmanaged subtype of PieceOperationDtoReq");
 
         entity.setCost(Optional.ofNullable(dto.getCost()).orElse(BigDecimal.ZERO));
         entity.setPerformedAt(dto.getPerformedAt());
@@ -90,25 +97,25 @@ public abstract class AppointmentWorkItemMapper {
     }
 
     @Named("appointmentWorkItemMapperEntityToDto")
-    abstract List<AppointmentWorkItemDto> fromEntityToDto(Set<AppointmentWorkItemEntity> entity);
+    abstract List<AppointmentWorkItemDtoRes> fromEntityToDto(Set<AppointmentWorkItemEntity> entity);
 
-    PieceOperationDto fromEntityToDto(PieceOperationEntity entity) {
+    PieceOperationDtoRes fromEntityToDto(PieceOperationEntity entity) {
         var piece = fromEntityToDto(entity.getPiece());
         var entityClass = Hibernate.getClass(entity);
         if (entityClass == PieceOperationBuyEntity.class)
-            return new PieceOperationBuyDto("buy", entity.getPerformedAt())
+            return new PieceOperationBuyDtoRes("buy", entity.getPerformedAt())
                     .cost(entity.getCost()).piece(piece);
         if (entityClass == PieceOperationInstallEntity.class)
-            return new PieceOperationInstallDto("install", entity.getPerformedAt())
+            return new PieceOperationInstallDtoRes("install", entity.getPerformedAt())
                     .cost(entity.getCost()).piece(piece);
         if (entityClass == PieceOperationRepairEntity.class)
-            return new PieceOperationRepairDto("repair", entity.getPerformedAt())
+            return new PieceOperationRepairDtoRes("repair", entity.getPerformedAt())
                     .cost(entity.getCost()).piece(piece);
         if (entityClass == PieceOperationSellEntity.class)
-            return new PieceOperationSellDto("sell", entity.getPerformedAt())
+            return new PieceOperationSellDtoRes("sell", entity.getPerformedAt())
                     .cost(entity.getCost()).piece(piece);
         if (entityClass == PieceOperationThrashEntity.class)
-            return new PieceOperationThrashDto("thrash", entity.getPerformedAt())
+            return new PieceOperationThrashDtoRes("thrash", entity.getPerformedAt())
                     .cost(entity.getCost()).piece(piece);
         throw new IllegalStateException("Cannot map unmanaged subtype of PieceOperationEntity");
     }

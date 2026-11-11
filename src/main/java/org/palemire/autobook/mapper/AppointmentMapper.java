@@ -4,7 +4,8 @@ import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-import org.palemire.autobook.dto.AppointmentDto;
+import org.palemire.autobook.dto.AppointmentDtoReq;
+import org.palemire.autobook.dto.AppointmentDtoRes;
 import org.palemire.autobook.entity.AppointmentEntity;
 
 import java.time.temporal.ChronoField;
@@ -23,7 +24,7 @@ public interface AppointmentMapper {
     @Mapping(target = "appointmentWorkItems", source = "appointmentWorkItems", qualifiedByName = "appointmentWorkItemMapperDtoToEntity")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "xid", ignore = true)
-    AppointmentEntity fromDtoToEntity(AppointmentDto dto);
+    AppointmentEntity fromDtoToEntity(AppointmentDtoReq dto);
 
     @AfterMapping
     default void linkBackreferences(@MappingTarget AppointmentEntity appointmentEntity) {
@@ -32,7 +33,7 @@ public interface AppointmentMapper {
     }
 
     @Mapping(target = "appointmentWorkItems", source = "appointmentWorkItems", qualifiedByName = "appointmentWorkItemMapperEntityToDto")
-    AppointmentDto fromEntityToDto(AppointmentEntity entity);
+    AppointmentDtoRes fromEntityToDto(AppointmentEntity entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "xid", ignore = true)

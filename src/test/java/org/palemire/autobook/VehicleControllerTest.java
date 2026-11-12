@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.palemire.autobook.dto.*;
 import org.palemire.autobook.entity.AppointmentEntity;
 import org.palemire.autobook.entity.AppointmentWorkItemLaborEntity;
+import org.palemire.autobook.entity.PieceEntity;
 import org.palemire.autobook.entity.PieceOperationEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
@@ -94,8 +95,10 @@ class VehicleControllerTest {
         var operationPerformedAt = LocalDateTime.of(2025, Month.DECEMBER, 17, 9, 0);
 
         String appointmentWorkItem1Piece2PieceXid = "manual-xid";
-        var appointmentWorkItem1Piece2PartNumber = "WINTER-20555";
-        var appointmentWorkItem1Piece2PieceCategory = "WIPER";
+        var appointmentWorkItem1Piece1PartNumber = "BR501630";
+        var appointmentWorkItem1Piece1PieceCategory = "BRAKE";
+        var appointmentWorkItem1Piece1PieceBrand = "BREMBO";
+        var appointmentWorkItem1Piece1PieceModel = "BELLZINGER";
 
         var dtoForCreate = new AppointmentDtoReq()
                 .title(appointmentTitle)
@@ -121,7 +124,19 @@ class VehicleControllerTest {
                                         .pieceOperations(
                                                 List.of(
                                                         new PieceOperationBuyDtoReq("buy", operationPerformedAt)
-                                                                .cost(appointmentWorkItem1Piece1Cost),
+                                                                .cost(appointmentWorkItem1Piece1Cost)
+                                                                .pieceKindReq(
+                                                                        new PieceKindNewDtoReq()
+                                                                                .kind("new")
+                                                                                .piece(
+                                                                                        new PieceBrakeDtoReq()
+                                                                                                .type("brake")
+                                                                                                .partNumber(appointmentWorkItem1Piece1PartNumber)
+                                                                                                .category(appointmentWorkItem1Piece1PieceCategory)
+                                                                                                .brand(appointmentWorkItem1Piece1PieceBrand)
+                                                                                                .model(appointmentWorkItem1Piece1PieceModel)
+                                                                                )
+                                                                ),
                                                         new PieceOperationBuyDtoReq("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece2Cost)
                                                                 .pieceKindReq(
@@ -182,12 +197,8 @@ class VehicleControllerTest {
         List<PieceOperationEntity> pieceOperationEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awi -> awi.getPieceOperations().stream()).toList();
 
         assertThat(pieceOperationEntities)
-                .hasSize(2)
-                .allMatch(operation ->
-                        operationPerformedAt.equals(operation.getPerformedAt())
-                                && (operation.getPiece() == null
-                                || appointmentWorkItem1Piece2PieceXid.equals(operation.getPiece().getXid()))
-                );
+                .hasSize(2);
+
 
 
         /**
@@ -233,7 +244,20 @@ class VehicleControllerTest {
                                         .pieceOperations(
                                                 List.of(
                                                         new PieceOperationBuyDtoReq("buy", operationPerformedAt)
-                                                                .cost(appointmentWorkItem1Piece1Cost),
+                                                                .cost(appointmentWorkItem1Piece1Cost)
+                                                                .pieceKindReq(
+                                                                        new PieceKindNewDtoReq()
+                                                                                .kind("new")
+                                                                                .piece(
+                                                                                        new PieceBrakeDtoReq()
+                                                                                                .type("brake")
+                                                                                                .partNumber(appointmentWorkItem1Piece1PartNumber)
+                                                                                                .category(appointmentWorkItem1Piece1PieceCategory)
+                                                                                                .brand(appointmentWorkItem1Piece1PieceBrand)
+                                                                                                .model(appointmentWorkItem1Piece1PieceModel)
+                                                                                )
+                                                                )
+                                                        ,
                                                         new PieceOperationBuyDtoReq("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece2Cost)
                                                                 .pieceKindReq(
@@ -292,13 +316,10 @@ class VehicleControllerTest {
 
         pieceOperationEntities = appointmentEntity.getAppointmentWorkItems().stream().flatMap(awi -> awi.getPieceOperations().stream()).toList();
 
+        // essential for the next GET API call to verify the returned DTO content
+        var appointmentWorkItem1Piece1PieceXid = pieceOperationEntities.stream().map(PieceOperationEntity::getPiece).filter(piece -> appointmentWorkItem1Piece1PartNumber.equals(piece.getPartNumber())).findFirst().map(PieceEntity::getXid).orElseThrow();
         assertThat(pieceOperationEntities)
-                .hasSize(2)
-                .allMatch(operation ->
-                        operationPerformedAt.equals(operation.getPerformedAt())
-                                && (operation.getPiece() == null
-                                || appointmentWorkItem1Piece2PieceXid.equals(operation.getPiece().getXid()))
-                );
+                .hasSize(2);
 
         /**
          * API call to GET the whole appointment resource
@@ -311,62 +332,66 @@ class VehicleControllerTest {
                                 .content(objectMapper.writeValueAsString(dtoForUpdate))
                 )
                 .andExpect(status().isOk())
-                .andExpect(content().json("""
-                    {
-                      "title": "Warranty service",
-                      "note": "once a year",
-                      "date": "2025-12-18",
-                      "time": "09:00:00",
-                      "appointmentWorkItems": [
+                .andExpect(content().json(String.format("""
                         {
-                          "title": "Oil change",
-                          "appointmentWorkItemsLabor": [
+                          "title": "Warranty service",
+                          "note": "once a year",
+                          "date": "2025-12-18",
+                          "time": "09:00:00",
+                          "appointmentWorkItems": [
                             {
-                              "title": "Empty old oil",
-                              "hoursWorked": 0.50,
-                              "cost": 25.50
-                            },
-                            {
-                              "title": "Oil refill",
-                              "hoursWorked": 0.79,
-                              "cost": 30.11
-                            },
-                            {
-                              "title": "Cleanup",
-                              "hoursWorked": 0.48,
-                              "cost": 30.11
+                              "title": "Oil change",
+                              "appointmentWorkItemsLabor": [
+                                {
+                                  "title": "Empty old oil",
+                                  "hoursWorked": 0.50,
+                                  "cost": 25.50
+                                },
+                                {
+                                  "title": "Oil refill",
+                                  "hoursWorked": 0.79,
+                                  "cost": 30.11
+                                },
+                                {
+                                  "title": "Cleanup",
+                                  "hoursWorked": 0.48,
+                                  "cost": 30.11
+                                }
+                              ],
+                              "pieceOperations": [
+                                {
+                                  "type": "buy",
+                                  "performedAt": "2025-12-17T09:00:00",
+                                  "piece": {
+                                    "xid": %s,
+                                    "partNumber": "BR501630",
+                                    "category": "BRAKE"
+                                  },
+                                  "cost": 11.11
+                                },
+                                {
+                                  "type": "buy",
+                                  "performedAt": "2025-12-17T09:00:00",
+                                  "piece": {
+                                    "xid": "manual-xid",
+                                    "partNumber": "WINTER-20555",
+                                    "category": "WIPER"
+                                  },
+                                  "cost": 110.11
+                                }
+                              ]
                             }
                           ],
-                          "pieceOperations": [
+                          "appointmentNotes": [
                             {
-                              "type": "buy",
-                              "performedAt": "2025-12-17T09:00:00",
-                              "piece": null,
-                              "cost": 11.11
+                              "note": "Check the tires soon"
                             },
                             {
-                              "type": "buy",
-                              "performedAt": "2025-12-17T09:00:00",
-                              "piece": {
-                                "id": 1,
-                                "partNumber": "WINTER-20555",
-                                "category": "WIPER"
-                              },
-                              "cost": 110.11
+                              "note": "Free tire storage for the winter"
                             }
                           ]
                         }
-                      ],
-                      "appointmentNotes": [
-                        {
-                          "note": "Check the tires soon"
-                        },
-                        {
-                          "note": "Free tire storage for the winter"
-                        }
-                      ]
-                    }
-                    """));
+                        """, appointmentWorkItem1Piece1PieceXid)));
     }
 
     /**

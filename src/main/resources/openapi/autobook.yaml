@@ -243,8 +243,8 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          part: '#/components/schemas/PieceBrakeDtoReq'
-          fluid: '#/components/schemas/PieceWiperDtoReq'
+          brake: '#/components/schemas/PieceBrakeDtoReq'
+          wiper: '#/components/schemas/PieceWiperDtoReq'
       properties:
         type:
           type: string
@@ -322,9 +322,8 @@ components:
     PieceSummaryDto:
       type: object
       properties:
-        id:
-          type: integer
-          format: int64
+        xid:
+          type: string
         partNumber:
           type: string
         category:

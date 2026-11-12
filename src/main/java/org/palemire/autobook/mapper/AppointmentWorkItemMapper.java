@@ -1,28 +1,9 @@
 package org.palemire.autobook.mapper;
 
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.Named;
+import org.mapstruct.*;
 import org.hibernate.Hibernate;
 import org.palemire.autobook.Response400Exception;
-import org.palemire.autobook.dto.AppointmentWorkItemDtoReq;
-import org.palemire.autobook.dto.AppointmentWorkItemDtoRes;
-import org.palemire.autobook.dto.AppointmentWorkItemLaborDto;
-import org.palemire.autobook.dto.PieceOperationBuyDtoReq;
-import org.palemire.autobook.dto.PieceOperationBuyDtoRes;
-import org.palemire.autobook.dto.PieceOperationDtoReq;
-import org.palemire.autobook.dto.PieceOperationDtoRes;
-import org.palemire.autobook.dto.PieceOperationInstallDtoReq;
-import org.palemire.autobook.dto.PieceOperationInstallDtoRes;
-import org.palemire.autobook.dto.PieceOperationRepairDtoReq;
-import org.palemire.autobook.dto.PieceOperationRepairDtoRes;
-import org.palemire.autobook.dto.PieceOperationSellDtoReq;
-import org.palemire.autobook.dto.PieceOperationSellDtoRes;
-import org.palemire.autobook.dto.PieceOperationThrashDtoReq;
-import org.palemire.autobook.dto.PieceOperationThrashDtoRes;
-import org.palemire.autobook.dto.PieceSummaryDto;
+import org.palemire.autobook.dto.*;
 import org.palemire.autobook.entity.AppointmentWorkItemEntity;
 import org.palemire.autobook.entity.AppointmentWorkItemLaborEntity;
 import org.palemire.autobook.entity.PieceBrakeEntity;
@@ -43,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", subclassExhaustiveStrategy = SubclassExhaustiveStrategy.RUNTIME_EXCEPTION)
 public abstract class AppointmentWorkItemMapper {
 
     @Autowired
@@ -76,7 +57,7 @@ public abstract class AppointmentWorkItemMapper {
 
         entity.setCost(Optional.ofNullable(dto.getCost()).orElse(BigDecimal.ZERO));
         entity.setPerformedAt(dto.getPerformedAt());
-        entity.setPiece(verifyPieceIdExistsIfSpecified(dto.getPiece()));
+        entity.setPiece(resolvePiece(dto.getPieceKindReq()));
 
         return entity;
     }
@@ -87,13 +68,31 @@ public abstract class AppointmentWorkItemMapper {
                 .forEach(labor -> labor.setAppointmentWorkItem(appointmentWorkItem));
     }
 
-    PieceEntity verifyPieceIdExistsIfSpecified(PieceSummaryDto pieceInDto) {
-        Long pieceId = Optional.ofNullable(pieceInDto).map(PieceSummaryDto::getId).orElse(null);
-        if (pieceId == null)
+    PieceEntity resolvePiece(PieceKindDtoReq pieceKindDtoReq) {
+        if (pieceKindDtoReq == null)
             return null;
-        if (pieceRepository.existsById(pieceId))
-            return pieceRepository.getReferenceById(pieceId);
-        throw new Response400Exception("Piece ID specified: (%d) does not exist".formatted(pieceId));
+        else if (pieceKindDtoReq instanceof PieceKindExistingDtoReq pieceKindDto)
+            return verifyPieceIdExistsIfSpecified(pieceKindDto);
+        else if (pieceKindDtoReq instanceof PieceKindNewDtoReq pieceKindDto) {
+            return fromDtoToEntity(pieceKindDto.getPiece());
+        }
+        throw new IllegalStateException("Cannot map unmanaged subtype of PieceKindDtoReq");
+    }
+
+    @SubclassMapping(source = PieceBrakeDtoReq.class, target = PieceBrakeEntity.class)
+    @SubclassMapping(source = PieceWiperDtoReq.class, target = PieceWiperEntity.class)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "xid", ignore = true)
+    abstract PieceEntity fromDtoToEntity(PieceDtoReq pieceDto);
+
+    PieceEntity verifyPieceIdExistsIfSpecified(PieceKindExistingDtoReq pieceInDto) {
+        String pieceXid = Optional.ofNullable(pieceInDto).map(PieceKindExistingDtoReq::getPieceXid).orElse(null);
+        if (pieceXid == null)
+            return null;
+        Optional<Long> pieceId = pieceRepository.findIdByXid(pieceXid);
+        if (pieceId.isPresent())
+            return pieceRepository.getReferenceById(pieceId.get());
+        throw new Response400Exception("Piece ID specified: (%d) does not exist".formatted(pieceXid));
     }
 
     @Named("appointmentWorkItemMapperEntityToDto")

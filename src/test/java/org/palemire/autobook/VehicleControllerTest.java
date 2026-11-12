@@ -4,12 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
-import org.palemire.autobook.dto.AppointmentDtoReq;
-import org.palemire.autobook.dto.AppointmentNoteDto;
-import org.palemire.autobook.dto.AppointmentWorkItemDtoReq;
-import org.palemire.autobook.dto.AppointmentWorkItemLaborDto;
-import org.palemire.autobook.dto.PieceOperationBuyDtoReq;
-import org.palemire.autobook.dto.PieceSummaryDto;
+import org.palemire.autobook.dto.*;
 import org.palemire.autobook.entity.AppointmentEntity;
 import org.palemire.autobook.entity.AppointmentWorkItemLaborEntity;
 import org.palemire.autobook.entity.PieceOperationEntity;
@@ -98,9 +93,9 @@ class VehicleControllerTest {
         var appointmentWorkItem1Piece2Cost = new BigDecimal("110.11");
         var operationPerformedAt = LocalDateTime.of(2025, Month.DECEMBER, 17, 9, 0);
 
-        Long appointmentWorkItem1Piece2PieceId = 1L;
-        var appointmentWorkItem1Piece2PartNumber = "WINTER-205-55";
-        var appointmentWorkItem1Piece2PieceCategory = "TIRE";
+        String appointmentWorkItem1Piece2PieceXid = "manual-xid";
+        var appointmentWorkItem1Piece2PartNumber = "WINTER-20555";
+        var appointmentWorkItem1Piece2PieceCategory = "WIPER";
 
         var dtoForCreate = new AppointmentDtoReq()
                 .title(appointmentTitle)
@@ -129,11 +124,12 @@ class VehicleControllerTest {
                                                                 .cost(appointmentWorkItem1Piece1Cost),
                                                         new PieceOperationBuyDtoReq("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece2Cost)
-                                                                .piece(new PieceSummaryDto()
-                                                                        .id(appointmentWorkItem1Piece2PieceId)
-                                                                        .partNumber(appointmentWorkItem1Piece2PartNumber)
-                                                                        .category(appointmentWorkItem1Piece2PieceCategory)
+                                                                .pieceKindReq(
+                                                                        new PieceKindExistingDtoReq()
+                                                                                .kind("existing")
+                                                                                .pieceXid(appointmentWorkItem1Piece2PieceXid)
                                                                 )
+
                                                 )
                                         )
                         )
@@ -190,7 +186,7 @@ class VehicleControllerTest {
                 .allMatch(operation ->
                         operationPerformedAt.equals(operation.getPerformedAt())
                                 && (operation.getPiece() == null
-                                || appointmentWorkItem1Piece2PieceId.equals(operation.getPiece().getId()))
+                                || appointmentWorkItem1Piece2PieceXid.equals(operation.getPiece().getXid()))
                 );
 
 
@@ -240,11 +236,10 @@ class VehicleControllerTest {
                                                                 .cost(appointmentWorkItem1Piece1Cost),
                                                         new PieceOperationBuyDtoReq("buy", operationPerformedAt)
                                                                 .cost(appointmentWorkItem1Piece2Cost)
-                                                                .piece(
-                                                                        new PieceSummaryDto()
-                                                                                .id(appointmentWorkItem1Piece2PieceId)
-                                                                                .partNumber(appointmentWorkItem1Piece2PartNumber)
-                                                                                .category(appointmentWorkItem1Piece2PieceCategory)
+                                                                .pieceKindReq(
+                                                                        new PieceKindExistingDtoReq()
+                                                                                .kind("existing")
+                                                                                .pieceXid(appointmentWorkItem1Piece2PieceXid)
                                                                 )
                                                 )
                                         )
@@ -302,7 +297,7 @@ class VehicleControllerTest {
                 .allMatch(operation ->
                         operationPerformedAt.equals(operation.getPerformedAt())
                                 && (operation.getPiece() == null
-                                || appointmentWorkItem1Piece2PieceId.equals(operation.getPiece().getId()))
+                                || appointmentWorkItem1Piece2PieceXid.equals(operation.getPiece().getXid()))
                 );
 
         /**
@@ -354,8 +349,8 @@ class VehicleControllerTest {
                               "performedAt": "2025-12-17T09:00:00",
                               "piece": {
                                 "id": 1,
-                                "partNumber": "WINTER-205-55",
-                                "category": "TIRE"
+                                "partNumber": "WINTER-20555",
+                                "category": "WIPER"
                               },
                               "cost": 110.11
                             }
@@ -386,6 +381,8 @@ class VehicleControllerTest {
         LEFT JOIN FETCH ae.appointmentWorkItems awi
         LEFT JOIN FETCH awi.appointmentWorkItemsLabor awil
         LEFT JOIN FETCH awi.pieceOperations po
+        LEFT JOIN FETCH po.piece piece
+        LEFT JOIN FETCH po.vehicleAssociations va
         """, AppointmentEntity.class).getResultList();
     }
 

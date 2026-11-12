@@ -212,8 +212,62 @@ components:
         performedAt:
           type: string
           format: date-time
+        pieceKindReq:
+          $ref: '#/components/schemas/PieceKindDtoReq'
+    PieceKindDtoReq:
+      type: object
+      required: [kind]
+      discriminator:
+        propertyName: kind
+        mapping:
+          new: '#/components/schemas/PieceKindNewDtoReq'
+          existing: '#/components/schemas/PieceKindExistingDtoReq'
+      properties:
+        kind:
+          type: string
+    PieceKindNewDtoReq:
+      allOf:
+        - $ref: '#/components/schemas/PieceKindDtoReq'
+      properties:
         piece:
-          $ref: '#/components/schemas/PieceSummaryDto'
+          $ref: '#/components/schemas/PieceDtoReq'
+    PieceKindExistingDtoReq:
+      allOf:
+        - $ref: '#/components/schemas/PieceKindDtoReq'
+      properties:
+        pieceXid:
+          type: string
+    PieceDtoReq:
+      type: object
+      required: [part_number, category, type]
+      discriminator:
+        propertyName: type
+        mapping:
+          part: '#/components/schemas/PieceBrakeDtoReq'
+          fluid: '#/components/schemas/PieceWiperDtoReq'
+      properties:
+        type:
+          type: string
+        part_number:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        category:
+          type: string
+        tag:
+          type: string
+        km_life:
+          type: integer
+        days_life:
+          type: integer
+    PieceBrakeDtoReq:
+        allOf:
+            - $ref: '#/components/schemas/PieceDtoReq'
+    PieceWiperDtoReq:
+        allOf:
+            - $ref: '#/components/schemas/PieceDtoReq'
     PieceOperationBuyDtoReq:
       allOf:
         - $ref: '#/components/schemas/PieceOperationDtoReq'

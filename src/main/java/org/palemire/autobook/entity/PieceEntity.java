@@ -1,14 +1,7 @@
 package org.palemire.autobook.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.Table;
+import de.huxhorn.sulky.ulid.ULID;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,12 +14,17 @@ import lombok.Setter;
 @Setter
 public abstract class PieceEntity {
 
+    private static final ULID ULID_GENERATOR = new ULID();
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(value = AccessLevel.NONE)
     private Long id;
 
-    @Column(name = "part_number", nullable = false)
+    @Column(name = "xid")
+    private String xid;
+
+    @Column(name = "part_number")
     private String partNumber;
 
     @Column(name = "brand")
@@ -43,5 +41,11 @@ public abstract class PieceEntity {
 
     @Column(name = "days_life")
     private Integer daysLife;
+
+    @PrePersist
+    public void prePersist() {
+        if (xid == null)
+            xid = ULID_GENERATOR.nextULID();
+    }
 
 }

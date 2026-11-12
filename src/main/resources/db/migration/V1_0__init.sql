@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS user_vehicle_asso (
 
 CREATE TABLE IF NOT EXISTS appointment (
   id SERIAL PRIMARY KEY,
-  xid VARCHAR(26) NOT NULL,
+  xid VARCHAR(26) NOT NULL UNIQUE,
   title VARCHAR(100) NOT NULL,
   note VARCHAR(200),
   date DATE,
@@ -43,9 +43,6 @@ CREATE TABLE IF NOT EXISTS appointment (
     FOREIGN KEY (vehicle_id)
       REFERENCES vehicle(id)
 );
-
-/** B-tree index (default) **/
-CREATE INDEX idx_appointment_xid ON appointment(xid);
 
 CREATE TABLE IF NOT EXISTS appointment_note (
   id SERIAL PRIMARY KEY,
@@ -82,6 +79,7 @@ CREATE TABLE IF NOT EXISTS appointment_work_item_labor (
 /************************************/
 CREATE TABLE IF NOT EXISTS piece (
   id SERIAL PRIMARY KEY,
+  xid VARCHAR(26) NOT NULL UNIQUE,
   part_number VARCHAR(100) NOT NULL,
   brand VARCHAR(20),
   model VARCHAR(20),
@@ -216,4 +214,3 @@ CREATE TABLE IF NOT EXISTS piece_brake (
     FOREIGN KEY (id)
       REFERENCES piece(id)
 );
-

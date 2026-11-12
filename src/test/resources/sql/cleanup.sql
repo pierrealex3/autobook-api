@@ -8,6 +8,8 @@ DELETE FROM piece_operation_sell;
 DELETE FROM piece_operation_thrash;
 DELETE FROM piece_operation;
 DELETE FROM piece_tire;
+DELETE FROM piece_brake;
+DELETE FROM piece_wiper;
 DELETE FROM piece;
 DELETE FROM appointment_work_item_labor;
 DELETE FROM appointment_work_item;

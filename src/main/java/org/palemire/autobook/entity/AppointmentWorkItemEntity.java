@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -46,9 +45,9 @@ public class AppointmentWorkItemEntity {
     @Setter(AccessLevel.NONE)
     private Set<AppointmentWorkItemLaborEntity> appointmentWorkItemsLabor = new HashSet<>();
 
-    @ManyToMany(cascade = {jakarta.persistence.CascadeType.PERSIST, jakarta.persistence.CascadeType.MERGE})
+    @OneToMany(cascade = {jakarta.persistence.CascadeType.PERSIST, jakarta.persistence.CascadeType.MERGE})
     @JoinTable(
-            name = "appointment_work_item_piece_operation_asso",
+            name = "piece_operation_appointment_work_item_link",
             joinColumns = @JoinColumn(name = "appointment_work_item_id"),
             inverseJoinColumns = @JoinColumn(name = "piece_operation_id")
     )

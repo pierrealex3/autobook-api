@@ -7,8 +7,6 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Table(name = "piece_operation")
 @Entity
@@ -39,7 +37,7 @@ public abstract class PieceOperationEntity {
     /**
      * CascadeType.DELETE is already managed by the DB Engine.
      */
-    @OneToMany(mappedBy = "pieceOperation", cascade =   CascadeType.PERSIST)
-    private Set<VehiclePieceOperationAssociationEntity> vehicleAssociations = new HashSet<>();
+    @OneToOne(mappedBy = "pieceOperation", cascade = CascadeType.PERSIST)
+    private VehiclePieceOperationAssociationEntity vehicleAssociation;
 
 }

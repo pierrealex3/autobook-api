@@ -4,6 +4,7 @@ package org.palemire.autobook.service;
 import lombok.RequiredArgsConstructor;
 import org.palemire.autobook.Response400Exception;
 import org.palemire.autobook.entity.AppointmentEntity;
+import org.palemire.autobook.entity.VehiclePieceOperationAssociationEntity;
 import org.palemire.autobook.mapper.AppointmentMapper;
 import org.palemire.autobook.repository.AppointmentRepository;
 import org.palemire.autobook.repository.VehicleRepository;
@@ -22,6 +23,16 @@ public class AppointmentService {
     public void createAppointment(Integer vehicleId, AppointmentEntity appointmentEntity) {
         var vehicleEntity = vehicleRepository.getReferenceById(vehicleId);
         appointmentEntity.setVehicle(vehicleEntity);
+        appointmentEntity.getAppointmentWorkItems()
+                .stream()
+                .flatMap(appointmentWorkItemEntity -> appointmentWorkItemEntity.getPieceOperations().stream())
+                .forEach(pieceOperationEntity -> {
+                    var vehicleAssociation = new VehiclePieceOperationAssociationEntity();
+                    vehicleAssociation.setVehicle(vehicleEntity);
+                    vehicleAssociation.setPieceOperation(pieceOperationEntity);
+                    //vehicleAssociation.setOdometerKm(mustBeProvidedFromTheRequestContext); TODO
+                    pieceOperationEntity.setVehicleAssociation(vehicleAssociation);
+                });
         appointmentRepository.save(appointmentEntity);
     }
 

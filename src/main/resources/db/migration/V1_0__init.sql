@@ -144,10 +144,10 @@ CREATE TABLE IF NOT EXISTS piece_operation_thrash (
 /************************************/
 /* Piece Operation AssociationS     */
 /************************************/
-CREATE TABLE IF NOT EXISTS appointment_work_item_piece_operation_asso (
-  appointment_work_item_id INTEGER,
+CREATE TABLE IF NOT EXISTS piece_operation_appointment_work_item_link (
   piece_operation_id INTEGER,
-  PRIMARY KEY (appointment_work_item_id, piece_operation_id),
+  appointment_work_item_id INTEGER,
+  PRIMARY KEY (piece_operation_id),
   CONSTRAINT fk_appointment_work_item
     FOREIGN KEY (appointment_work_item_id)
       REFERENCES appointment_work_item(id),
@@ -157,11 +157,11 @@ CREATE TABLE IF NOT EXISTS appointment_work_item_piece_operation_asso (
       ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS vehicle_piece_operation_asso (
-  vehicle_id INTEGER,
+CREATE TABLE IF NOT EXISTS piece_operation_vehicle_link (
   piece_operation_id INTEGER,
+  vehicle_id INTEGER,
   odometer_km INTEGER,
-  PRIMARY KEY (vehicle_id, piece_operation_id),
+  PRIMARY KEY (piece_operation_id),
   CONSTRAINT fk_vehicle_4
     FOREIGN KEY (vehicle_id)
       REFERENCES vehicle(id),

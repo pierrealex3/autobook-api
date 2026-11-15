@@ -1,6 +1,6 @@
 BEGIN;
-DELETE FROM vehicle_piece_operation_asso;
-DELETE FROM appointment_work_item_piece_operation_asso;
+DELETE FROM piece_operation_vehicle_link;
+DELETE FROM piece_operation_appointment_work_item_link;
 DELETE FROM piece_operation_buy;
 DELETE FROM piece_operation_install;
 DELETE FROM piece_operation_repair;

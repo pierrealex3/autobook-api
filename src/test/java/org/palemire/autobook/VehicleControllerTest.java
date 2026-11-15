@@ -396,7 +396,7 @@ class VehicleControllerTest {
 
     /**
      * From this test, it is required to specify LEFT JOIN FETCH statements for every lazy-loaded association.
-     * Without that, the database data required for comparison would be incomplete.
+     * Without that, the database data (concretely: the JPA Entities) required for comparison would be incomplete.
      * @return the whole appointment database model.
      */
     private List<AppointmentEntity> fetchWholeAppointmentEntityModel() {
@@ -407,7 +407,8 @@ class VehicleControllerTest {
         LEFT JOIN FETCH awi.appointmentWorkItemsLabor awil
         LEFT JOIN FETCH awi.pieceOperations po
         LEFT JOIN FETCH po.piece piece
-        LEFT JOIN FETCH po.vehicleAssociations va
+        LEFT JOIN FETCH po.vehicleAssociation va
+        LEFT JOIN FETCH va.vehicle v
         """, AppointmentEntity.class).getResultList();
     }
 

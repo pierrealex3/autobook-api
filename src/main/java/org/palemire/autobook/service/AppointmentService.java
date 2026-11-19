@@ -45,4 +45,9 @@ public class AppointmentService {
     public AppointmentEntity getAppointment(String appointmentId) {
         return appointmentRepository.findByXid(appointmentId).orElseThrow(Response400Exception::new);
     }
+
+    public Integer getVehicleIdForAppointment(String appointmentId) {
+        var appointmentEntity = appointmentRepository.findByXid(appointmentId).orElseThrow(Response400Exception::new);
+        return appointmentEntity.getVehicle().getId();
+    }
 }

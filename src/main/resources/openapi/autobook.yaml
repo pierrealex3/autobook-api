@@ -104,6 +104,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/EventDto'
+  /vehicles/{vehicleId}/pieces:
+      get:
+        operationId: getVehiclePieces
+        tags: [Vehicle]
+        parameters:
+          - name: vehicleId
+            in: path
+            required: true
+            schema:
+              type: integer
+              format: int32
+        responses:
+          '200':
+            description: Pieces associated with the vehicle
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/PieceSummaryDto'
 components:
   schemas:
     AppointmentCreatedDto:

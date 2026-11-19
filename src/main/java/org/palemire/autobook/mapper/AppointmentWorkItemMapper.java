@@ -120,7 +120,7 @@ public abstract class AppointmentWorkItemMapper {
     }
 
     @Mapping(target = "category", source = "entity", qualifiedByName = "categoryDefinitionForPiece")
-    abstract PieceSummaryDto fromEntityToDto(PieceEntity entity);
+    public abstract PieceSummaryDto fromEntityToDto(PieceEntity entity);
 
     @Named("categoryDefinitionForPiece")
     String categoryDefinitionForPiece(PieceEntity piece) {

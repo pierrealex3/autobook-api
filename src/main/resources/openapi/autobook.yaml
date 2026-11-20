@@ -213,6 +213,7 @@ components:
           type: number
         cost:
           type: number
+          default: 0
     PieceOperationDtoReq:
       type: object
       required: [type, performedAt]
@@ -229,6 +230,7 @@ components:
           type: string
         cost:
           type: number
+          default: 0
         performedAt:
           type: string
           format: date-time

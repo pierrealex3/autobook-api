@@ -5,7 +5,7 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.palemire.autobook.dto.PieceSummaryDto;
 import org.palemire.autobook.entity.PieceEntity;
-import org.palemire.autobook.mapper.AppointmentWorkItemMapper;
+import org.palemire.autobook.mapper.PieceMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -18,7 +18,7 @@ public class PieceService {
     @PersistenceContext
     private final EntityManager entityManager;
 
-    private final AppointmentWorkItemMapper appointmentWorkItemMapper;
+    private final PieceMapper pieceMapper;
 
     public List<PieceSummaryDto> getPiecesSummariesForVehicle(Integer vehicleId) {
         var query = entityManager.createQuery("""
@@ -30,7 +30,7 @@ public class PieceService {
           """, PieceEntity.class);
         query.setParameter("vehicleId", vehicleId);
         var pieces = query.getResultList();
-        return pieces.stream().map(appointmentWorkItemMapper::fromEntityToDto).toList();
+        return pieces.stream().map(pieceMapper::fromEntityToDto).toList();
     }
 
     public boolean piecesNotAssociatedToVehicle(List<String> piecesXids, Integer vehicleId) {

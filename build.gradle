@@ -35,6 +35,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-jackson2'
 	implementation 'org.springframework.boot:spring-boot-starter-flyway'
 	implementation 'de.huxhorn.sulky:de.huxhorn.sulky.ulid:8.3.0'
+	implementation 'jakarta.validation:jakarta.validation-api'
 
 	implementation 'org.mapstruct:mapstruct:1.6.3'
 
@@ -72,7 +73,7 @@ openApiGenerate {
 		annotationLibrary: 'none',
 		documentationProvider: 'none',
 		dateLibrary: 'java8-localdatetime',
-		useBeanValidation: 'false',
+		useBeanValidation: 'true',
 		useOptional: 'false',
 		openApiNullable: 'false',
 		generateJsonIncludeAnnotations: 'false'
